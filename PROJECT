@@ -1,0 +1,20 @@
+domain: clusterplus.io
+layout:
+- go.kubebuilder.io/v3
+projectName: clusterplus
+repo: clusterplus.io/clusterplus
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: clusterplus.io
+  group: apps
+  kind: Plus
+  path: clusterplus.io/clusterplus/api/v1
+  version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+version: "3"
