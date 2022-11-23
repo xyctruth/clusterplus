@@ -1,0 +1,27 @@
+# permissions for end users to view pluses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: plus-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: clusterplus
+    app.kubernetes.io/part-of: clusterplus
+    app.kubernetes.io/managed-by: kustomize
+  name: plus-viewer-role
+rules:
+- apiGroups:
+  - apps.clusterplus.io
+  resources:
+  - pluses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.clusterplus.io
+  resources:
+  - pluses/status
+  verbs:
+  - get
