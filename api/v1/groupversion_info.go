@@ -33,4 +33,6 @@ var (
 
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
+
+	PlusKind = schema.GroupKind{Group: "apps.clusterplus.io", Kind: "Plus"}
 )

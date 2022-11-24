@@ -9,4 +9,12 @@ metadata:
     app.kubernetes.io/created-by: clusterplus
   name: plus-sample
 spec:
-  # TODO(user): Add fields here
+  gateway:
+    cors:
+      allowOrigins:
+        - api.xyctruth.work
+    hosts:
+      - api.jia-huang.com
+    weights:
+      prod-blue: 100
+      prod-green: 0

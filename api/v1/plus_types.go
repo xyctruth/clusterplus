@@ -29,7 +29,7 @@ type PlusSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Plus. Edit plus_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Gateway *PlusGateway `json:"gateway,omitempty"`
 }
 
 // PlusStatus defines the observed state of Plus
