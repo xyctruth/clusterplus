@@ -1,20 +1,67 @@
 apiVersion: apps.clusterplus.io/v1
 kind: Plus
 metadata:
-  labels:
-    app.kubernetes.io/name: plus
-    app.kubernetes.io/instance: plus-sample
-    app.kubernetes.io/part-of: clusterplus
-    app.kuberentes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: clusterplus
-  name: plus-sample
+  name: nginx
 spec:
   gateway:
     cors:
       allowOrigins:
-        - api.xyctruth.work
+        - api-fat.tanjingmama.cn
     hosts:
-      - api.jia-huang.com
+      - api-fat.tanjingmama.cn
     weights:
-      prod-blue: 100
-      prod-green: 0
+      blue: 50
+      green: 50
+  policy:
+    timeout: 10s
+    maxRequests: 1000
+    outlierDetection:
+      consecutiveErrors: 5000
+      ejectionPercent: 50
+      ejectionTime: 30s
+      interval: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx
+    fault:
+      delay:
+        percent: 0
+        delay: 5s
+      abort:
+        percent: 0
+        httpStatus: 500
+  apps:
+    - name: blue
+      env:
+        - name: VERSION
+          value: blue1
+      image: xyctruth/test:v0.0.3
+      maxReplicas: 1
+      minReplicas: 1
+      port: 8080
+      protocol: http
+      resources:
+        limits:
+          cpu: 200m
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    - name: green
+      env:
+        - name: VERSION
+          value: green1
+      image: xyctruth/test:v0.0.3
+      maxReplicas: 1
+      minReplicas: 1
+      port: 8080
+      protocol: http
+      resources:
+        limits:
+          cpu: 200m
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+
