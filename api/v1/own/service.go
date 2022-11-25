@@ -33,7 +33,7 @@ func NewService(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, log
 	return d
 }
 
-// apply this own resource, create or update
+// Apply this own resource, create or update
 func (d *Service) Apply() error {
 	for _, app := range d.plus.Spec.Apps {
 		obj, err := d.generate(app)

@@ -17,8 +17,8 @@ limitations under the License.
 package controllers
 
 import (
-	"clusterplus.io/clusterplus/api/own"
 	plusappsv1 "clusterplus.io/clusterplus/api/v1"
+	own2 "clusterplus.io/clusterplus/api/v1/own"
 	"context"
 	"errors"
 	"fmt"
@@ -33,14 +33,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // PlusReconciler reconciles a Plus object
 type PlusReconciler struct {
 	client.Client
-	Log      logr.Logger
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
 }
@@ -59,10 +57,9 @@ type PlusReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
 
-	fmt.Println("*********************************************************************")
-	log := r.Log.WithValues("plus", req.NamespacedName)
+	log.Info("*********************************************************************")
 
 	//if !plusappsv1.CONFIG.FilterRequest(req.Name) {
 	//	log.WithValues("config", plusappsv1.CONFIG).WithValues("req", req.Name).Info("Reconcile cancel,this req filter is false ")
@@ -74,9 +71,9 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if rec := recover(); rec != nil {
 			switch x := rec.(type) {
 			case error:
-				r.Log.Error(x, "Reconcile error")
+				log.Error(x, "Reconcile error")
 			case string:
-				r.Log.Error(errors.New(x), "Reconcile error")
+				log.Error(errors.New(x), "Reconcile error")
 			}
 		}
 	}()
@@ -97,7 +94,7 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 	}
 
-	if res, err, isFinalizer := r.Finalizer(ctx, &found); isFinalizer {
+	if res, err, isFinalizer := r.Finalizer(ctx, log, &found); isFinalizer {
 		return res, err
 	}
 
@@ -144,7 +141,7 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 }
 
-func (r *PlusReconciler) Finalizer(ctx context.Context, instance *plusappsv1.Plus) (res ctrl.Result, err error, isContinue bool) {
+func (r *PlusReconciler) Finalizer(ctx context.Context, log logr.Logger, instance *plusappsv1.Plus) (res ctrl.Result, err error, isContinue bool) {
 	// 2. 删除操作
 	// 如果资源对象被直接删除，就无法再读取任何被删除对象的信息，这就会导致后续的清理工作因为信息不足无法进行，Finalizer字段设计来处理这种情况：
 	// 2.1 当资源对象 Finalizer字段不为空时，delete操作就会变成update操作，即为对象加上deletionTimestamp时间戳
@@ -159,7 +156,7 @@ func (r *PlusReconciler) Finalizer(ctx context.Context, instance *plusappsv1.Plu
 		if !containsString(instance.ObjectMeta.Finalizers, myFinalizerName) {
 			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, myFinalizerName)
 			if err := r.Update(ctx, instance); err != nil {
-				r.Log.Error(err, "Add Finalizers error", instance.Namespace, instance.Name)
+				log.Error(err, "Add Finalizers error", instance.Namespace, instance.Name)
 				return ctrl.Result{}, err, true
 			}
 		}
@@ -191,11 +188,11 @@ func (r *PlusReconciler) Finalizer(ctx context.Context, instance *plusappsv1.Plu
 func (r *PlusReconciler) getOwnResources(instance *plusappsv1.Plus, log logr.Logger) ([]IResource, error) {
 	var resources []IResource
 
-	resources = append(resources, own.NewDeployment(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own.NewService(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own.NewDestinationRule(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own.NewVirtualService(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own.NewAutoScaler(instance, r.Scheme, r.Client, log))
+	resources = append(resources, own2.NewDeployment(instance, r.Scheme, r.Client, log))
+	resources = append(resources, own2.NewService(instance, r.Scheme, r.Client, log))
+	resources = append(resources, own2.NewDestinationRule(instance, r.Scheme, r.Client, log))
+	resources = append(resources, own2.NewVirtualService(instance, r.Scheme, r.Client, log))
+	resources = append(resources, own2.NewAutoScaler(instance, r.Scheme, r.Client, log))
 
 	return resources, nil
 }

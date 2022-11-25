@@ -90,11 +90,10 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-	log := ctrl.Log.WithName("controllers").WithName("Plus")
+
 	if err = (&controllers.PlusReconciler{
 		Client:   mgr.GetClient(),
 		Scheme:   mgr.GetScheme(),
-		Log:      log,
 		Recorder: mgr.GetEventRecorderFor("Plus"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Plus")

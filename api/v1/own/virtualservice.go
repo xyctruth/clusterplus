@@ -159,7 +159,7 @@ func (d *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 		return []*istioapiv1.HTTPMatchRequest{
 			{
 				SourceNamespace: d.plus.GetNamespace(),
-				SourceLabels:    d.plus.GenerateAppLabels(app),
+				SourceLabels:    d.plus.GenerateVersionLabels(app),
 			},
 		}
 	}

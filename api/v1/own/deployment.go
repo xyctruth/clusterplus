@@ -67,9 +67,9 @@ func (d *Deployment) Apply() error {
 
 			// 设置重启
 			if app.RestartMark == "" {
-				obj.Spec.Template.Annotations["restartMark"] = found.Spec.Template.Annotations["restartMark"]
+				obj.Spec.Template.Annotations["apps.clusterplus.io/restart-mark"] = found.Spec.Template.Annotations["apps.clusterplus.io/restart-mark"]
 			} else {
-				obj.Spec.Template.Annotations["restartMark"] = app.RestartMark
+				obj.Spec.Template.Annotations["apps.clusterplus.io/restart-mark"] = app.RestartMark
 			}
 
 			if !reflect.DeepEqual(obj.Spec, found.Spec) {
@@ -130,7 +130,7 @@ func (d *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      d.plus.GenerateAppLabels(app),
-					Annotations: d.buildAnnotations(),
+					Annotations: d.buildAnnotations(app),
 				},
 				Spec: corev1.PodSpec{
 					InitContainers:                nil,
@@ -319,10 +319,8 @@ func (d *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
 	return nil
 }
 
-func (d *Deployment) buildAnnotations() map[string]string {
+func (d *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 	m := make(map[string]string)
-	if d.plus.Spec.Type == v1.PlusTypeGateway || d.plus.Spec.Type == v1.PlusTypeSvc {
-		m["conprof/discovery"] = "true"
-	}
+	m["apps.clusterplus.io/restart-mark"] = app.RestartMark
 	return m
 }

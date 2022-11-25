@@ -32,7 +32,7 @@ func NewDestinationRule(plus *v1.Plus, scheme *runtime.Scheme, client client.Cli
 	return d
 }
 
-// apply this own resource, create or update
+// Apply apply this own resource, create or update
 func (d *DestinationRule) Apply() error {
 	obj, err := d.generate()
 	if err != nil {

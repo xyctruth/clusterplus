@@ -104,6 +104,10 @@ func (in *Plus) GenerateLabels() map[string]string {
 	return labels
 }
 
+func (in *Plus) GenerateVersionLabels(app *PlusApp) map[string]string {
+	return map[string]string{"version": app.Name}
+}
+
 func (in *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
 	var labels = in.GenerateLabels()
 	labels["version"] = app.Name
