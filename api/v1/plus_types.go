@@ -92,7 +92,7 @@ func (in *Plus) GetNamespace() string {
 }
 
 func (in *Plus) GetAppName(app *PlusApp) string {
-	return in.Name + "-" + app.Name
+	return in.Name + "-" + app.Version
 }
 
 func (in *Plus) GenerateLabels() map[string]string {
@@ -105,12 +105,12 @@ func (in *Plus) GenerateLabels() map[string]string {
 }
 
 func (in *Plus) GenerateVersionLabels(app *PlusApp) map[string]string {
-	return map[string]string{"version": app.Name}
+	return map[string]string{"version": app.Version}
 }
 
 func (in *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
 	var labels = in.GenerateLabels()
-	labels["version"] = app.Name
+	labels["version"] = app.Version
 	return labels
 }
 
@@ -120,10 +120,10 @@ func (in *Plus) GenerateStatusDesc() {
 		in.Status.Desc.AvailableReplicas = in.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", k, v)
 	}
 	for _, v := range in.Spec.Apps {
-		in.Status.Desc.Replicas = in.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Name, v.MinReplicas, v.MaxReplicas)
+		in.Status.Desc.Replicas = in.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
-			in.Status.Desc.Images = in.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Name, imagesPath[len(imagesPath)-1])
+			in.Status.Desc.Images = in.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
 		}
 	}
 

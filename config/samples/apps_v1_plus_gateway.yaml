@@ -14,25 +14,25 @@ spec:
       green: 50
   policy:
     timeout: 10s
-#    maxRequests: 1000
-#    outlierDetection:
-#      consecutiveErrors: 5000
-#      ejectionPercent: 50
-#      ejectionTime: 30s
-#      interval: 10s
-#    retries:
-#      attempts: 3
-#      perTryTimeout: 3s
-#      retryOn: 5xx
-#    fault:
-#      delay:
-#        percent: 0
-#        delay: 5s
-#      abort:
-#        percent: 0
-#        httpStatus: 500
+    maxRequests: 1000
+    outlierDetection:
+      consecutiveErrors: 5000
+      ejectionPercent: 50
+      ejectionTime: 30s
+      interval: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx
+    fault:
+      delay:
+        percent: 0
+        delay: 5s
+      abort:
+        percent: 0
+        httpStatus: 500
   apps:
-    - name: blue
+    - version: blue
       env:
         - name: VERSION
           value: blue_version
@@ -48,7 +48,7 @@ spec:
         requests:
           cpu: 100m
           memory: 100Mi
-    - name: green
+    - version: green
       env:
         - name: VERSION
           value: green_version

@@ -167,7 +167,7 @@ func (d *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 	var headers = map[string]*istioapiv1.StringMatch{
 		"VERSION": {
 			MatchType: &istioapiv1.StringMatch_Exact{
-				Exact: app.Name,
+				Exact: app.Version,
 			},
 		},
 	}
@@ -177,14 +177,14 @@ func (d *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/%s/", app.Name, d.plus.GetName()),
+					Prefix: fmt.Sprintf("/%s/%s/", app.Version, d.plus.GetName()),
 				},
 			},
 		},
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/%s", app.Name, d.plus.GetName()),
+					Prefix: fmt.Sprintf("/%s/%s", app.Version, d.plus.GetName()),
 				},
 			},
 		},
@@ -220,14 +220,14 @@ func (d *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 				{
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s/", app.Name),
+							Prefix: fmt.Sprintf("/%s/", app.Version),
 						},
 					},
 				},
 				{
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s", app.Name),
+							Prefix: fmt.Sprintf("/%s", app.Version),
 						},
 					},
 				},
@@ -253,14 +253,14 @@ func (d *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 				{
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s/%s/", app.Name, d.plus.Spec.Gateway.URLPrefix),
+							Prefix: fmt.Sprintf("/%s/%s/", app.Version, d.plus.Spec.Gateway.URLPrefix),
 						},
 					},
 				},
 				{
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s/%s", app.Name, d.plus.Spec.Gateway.URLPrefix),
+							Prefix: fmt.Sprintf("/%s/%s", app.Version, d.plus.Spec.Gateway.URLPrefix),
 						},
 					},
 				},
@@ -351,7 +351,7 @@ func (d *VirtualService) generateDefaultRoute() []*istioapiv1.HTTPRouteDestinati
 				},
 				Subset: d.plus.GetAppName(app),
 			},
-			Weight: d.plus.Spec.Gateway.Weights[app.Name],
+			Weight: d.plus.Spec.Gateway.Weights[app.Version],
 		},
 		)
 	}

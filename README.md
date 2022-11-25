@@ -26,3 +26,75 @@ make install
 ```shell
 make run
 ```
+
+### samples yaml
+```yaml
+apiVersion: apps.clusterplus.io/v1
+kind: Plus
+metadata:
+  name: gateway
+spec:
+  gateway:
+    cors:
+      allowOrigins:
+        - api-fat.tanjingmama.cn
+    hosts:
+      - api-fat.tanjingmama.cn
+    weights:
+      blue: 50
+      green: 50
+  policy:
+    timeout: 10s
+    maxRequests: 1000
+    outlierDetection:
+      consecutiveErrors: 5000
+      ejectionPercent: 50
+      ejectionTime: 30s
+      interval: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx
+    fault:
+      delay:
+        percent: 0
+        delay: 5s
+      abort:
+        percent: 0
+        httpStatus: 500
+  apps:
+    - version: blue
+      env:
+        - name: VERSION
+          value: blue_version
+      image: xyctruth/plus-test:v0.0.3
+      maxReplicas: 1
+      minReplicas: 1
+      port: 8080
+      protocol: http
+      resources:
+        limits:
+          cpu: 200m
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    - version: green
+      env:
+        - name: VERSION
+          value: green_version
+      image: xyctruth/plus-test:v0.0.3
+      maxReplicas: 1
+      minReplicas: 1
+      port: 8080
+      protocol: http
+      resources:
+        limits:
+          cpu: 200m
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+
+```
+

@@ -141,11 +141,6 @@ func (d *PlusPolicy) Validate(fldPath *field.Path) error {
 		return apierrors.NewInvalid(PlusKind, "timeout", field.ErrorList{err})
 	}
 
-	if d.MaxRequest <= 0 {
-		err := field.Invalid(fldPath.Child("maxRequest"), d.MaxRequest, "maxRequest must > 0")
-		return apierrors.NewInvalid(PlusKind, "maxRequest", field.ErrorList{err})
-	}
-
 	if e := d.Fault; e != nil {
 		if err := e.Validate(fldPath); err != nil {
 			return err

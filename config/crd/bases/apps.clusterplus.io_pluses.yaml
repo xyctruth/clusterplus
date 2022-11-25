@@ -191,8 +191,6 @@ spec:
                     minReplicas:
                       format: int32
                       type: integer
-                    name:
-                      type: string
                     port:
                       format: int32
                       type: integer
@@ -227,6 +225,8 @@ spec:
                           type: object
                       type: object
                     restartMark:
+                      type: string
+                    version:
                       type: string
                   type: object
                 type: array

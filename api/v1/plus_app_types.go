@@ -9,7 +9,7 @@ import (
 )
 
 type PlusApp struct {
-	Name        string                      `json:"name,omitempty"`
+	Version     string                      `json:"version,omitempty"`
 	Image       string                      `json:"image,omitempty"`
 	Env         []corev1.EnvVar             `json:"env,omitempty"`
 	MinReplicas int32                       `json:"minReplicas,omitempty"`
@@ -23,9 +23,9 @@ type PlusApp struct {
 func (d *PlusApp) Validate(fldPath *field.Path) error {
 	fldPath = fldPath.Child("app")
 
-	if d.Name == "" {
-		err := field.Invalid(fldPath.Child("name"), d.Name, "name can't be empty")
-		return apierrors.NewInvalid(PlusKind, "name", field.ErrorList{err})
+	if d.Version == "" {
+		err := field.Invalid(fldPath.Child("version"), d.Version, "version can't be empty")
+		return apierrors.NewInvalid(PlusKind, "version", field.ErrorList{err})
 	}
 
 	if d.MinReplicas == 0 {

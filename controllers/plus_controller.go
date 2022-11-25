@@ -62,8 +62,8 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	log.Info("*********************************************************************")
 
-	//if !plusappsv1.CONFIG.FilterRequest(req.Name) {
-	//	log.WithValues("config", plusappsv1.CONFIG).WithValues("req", req.Name).Info("Reconcile cancel,this req filter is false ")
+	//if !plusappsv1.CONFIG.FilterRequest(req.Version) {
+	//	log.WithValues("config", plusappsv1.CONFIG).WithValues("req", req.Version).Info("Reconcile cancel,this req filter is false ")
 	//	return ctrl.Result{}, nil
 	//}
 
