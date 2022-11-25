@@ -18,6 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
       - name: Get the version
         id: get_version
         run: |
@@ -32,10 +36,10 @@ jobs:
           fi
           echo ::set-output name=VERSION::${VERSION}
       - uses: actions/checkout@v3
-      - name: deploy postgres to cluster
-        uses: wahyd4/kubectl-helm-action@master
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      - uses: infraway/generate-kube-config@v1.2
         with:
-          args: |
-            make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          kubeconfig: ${{ secrets.KUBECONFIG_DEV }}
+      - name: Deploy
+        id: deploy
+        run: |
+          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
