@@ -18,21 +18,23 @@ package main
 
 import (
 	"flag"
-	"istio.io/client-go/pkg/apis/networking/v1alpha3"
 	"os"
+
+	"istio.io/client-go/pkg/apis/networking/v1alpha3"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	appsv1 "clusterplus.io/clusterplus/api/v1"
-	"clusterplus.io/clusterplus/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	appsv1 "clusterplus.io/clusterplus/api/v1"
+	"clusterplus.io/clusterplus/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -98,6 +100,12 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Plus")
 		os.Exit(1)
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&appsv1.Plus{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Plus")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 
