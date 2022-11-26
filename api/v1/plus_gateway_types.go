@@ -7,10 +7,14 @@ import (
 )
 
 type PlusGateway struct {
-	Hosts     []string         `json:"hosts,omitempty"`
-	Cors      *PlusGatewayCors `json:"cors,omitempty"`
-	Weights   map[string]int32 `json:"weights,omitempty"`
-	URLPrefix string           `json:"urlPrefix,omitempty"`
+	Hosts   []string                     `json:"hosts,omitempty"`
+	Cors    *PlusGatewayCors             `json:"cors,omitempty"`
+	Weights map[string]int32             `json:"weights,omitempty"`
+	Route   map[string]*PlusGatewayRoute `json:"route,omitempty"`
+}
+
+type PlusGatewayRoute struct {
+	HeadersMatch []map[string]string `json:"headersMatch,omitempty"`
 }
 
 type PlusGatewayCors struct {
@@ -20,30 +24,26 @@ type PlusGatewayCors struct {
 	ExposeHeaders []string `json:"exposeHeaders,omitempty"`
 }
 
-type PlusGatewayWeights struct {
-	AllowOrigins []string `json:"allowOrigins,omitempty"`
-}
-
-func (d *PlusGateway) Validate(fldPath *field.Path) error {
+func (r *PlusGateway) Validate(fldPath *field.Path) error {
 	fldPath = fldPath.Child("gateway")
 
-	if d.Hosts == nil || len(d.Hosts) == 0 {
-		err := field.Invalid(fldPath.Child("hosts"), d.Hosts, "hosts can't be empty")
+	if r.Hosts == nil || len(r.Hosts) == 0 {
+		err := field.Invalid(fldPath.Child("hosts"), r.Hosts, "hosts can't be empty")
 		return apierrors.NewInvalid(PlusKind, "hosts", field.ErrorList{err})
 	}
 
-	if d.Weights == nil || len(d.Weights) == 0 {
-		err := field.Invalid(fldPath.Child("weights"), d.Weights, "weights can't be empty")
+	if r.Weights == nil || len(r.Weights) == 0 {
+		err := field.Invalid(fldPath.Child("weights"), r.Weights, "weights can't be empty")
 		return apierrors.NewInvalid(PlusKind, "weights", field.ErrorList{err})
 	}
 
 	var sum int32
-	for _, w := range d.Weights {
+	for _, w := range r.Weights {
 		sum += w
 	}
 
 	if sum != 100 {
-		err := field.Invalid(fldPath.Child("weights"), d.Weights, fmt.Sprintf("total weights sum must %d != 100", sum))
+		err := field.Invalid(fldPath.Child("weights"), r.Weights, fmt.Sprintf("total weights sum must %d != 100", sum))
 		return apierrors.NewInvalid(PlusKind, "weights", field.ErrorList{err})
 	}
 

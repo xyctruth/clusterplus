@@ -54,6 +54,9 @@ func (d *PlusPolicy) GetTimeout() *duration.Duration {
 	if err != nil {
 		return nil
 	}
+	if time == 0 {
+		return nil
+	}
 	dd := protobuftypes.DurationProto(time)
 	return &duration.Duration{
 		Seconds: dd.Seconds,
@@ -73,12 +76,12 @@ func (d *PlusPolicyRetries) GetPerTryTimeout() *duration.Duration {
 	}
 }
 
-func (d *PlusPolicyOutlierDetection) GetConsecutiveErrors() *wrappers.UInt32Value {
-	return &wrappers.UInt32Value{Value: d.ConsecutiveErrors}
+func (r *PlusPolicyOutlierDetection) GetConsecutiveErrors() *wrappers.UInt32Value {
+	return &wrappers.UInt32Value{Value: r.ConsecutiveErrors}
 }
 
-func (d *PlusPolicyOutlierDetection) GetInterval() *duration.Duration {
-	time, err := time.ParseDuration(d.Interval)
+func (r *PlusPolicyOutlierDetection) GetInterval() *duration.Duration {
+	time, err := time.ParseDuration(r.Interval)
 	if err != nil {
 		return nil
 	}
@@ -89,8 +92,8 @@ func (d *PlusPolicyOutlierDetection) GetInterval() *duration.Duration {
 	}
 }
 
-func (d *PlusPolicyOutlierDetection) GetEjectionTime() *durationpb.Duration {
-	time, err := time.ParseDuration(d.EjectionTime)
+func (r *PlusPolicyOutlierDetection) GetEjectionTime() *durationpb.Duration {
+	time, err := time.ParseDuration(r.EjectionTime)
 	if err != nil {
 		return nil
 	}
@@ -209,21 +212,21 @@ func (d *PlusPolicyFaultAbort) Validate(fldPath *field.Path) error {
 	return nil
 }
 
-func (d *PlusPolicyOutlierDetection) Validate(fldPath *field.Path) error {
+func (r *PlusPolicyOutlierDetection) Validate(fldPath *field.Path) error {
 	fldPath = fldPath.Child("outlierDetection")
 
-	if _, err := time.ParseDuration(d.Interval); err != nil {
-		err := field.Invalid(fldPath.Child("interval"), d.Interval, err.Error())
+	if _, err := time.ParseDuration(r.Interval); err != nil {
+		err := field.Invalid(fldPath.Child("interval"), r.Interval, err.Error())
 		return apierrors.NewInvalid(PlusKind, "interval", field.ErrorList{err})
 	}
 
-	if _, err := time.ParseDuration(d.EjectionTime); err != nil {
-		err := field.Invalid(fldPath.Child("ejectionTime"), d.EjectionTime, err.Error())
+	if _, err := time.ParseDuration(r.EjectionTime); err != nil {
+		err := field.Invalid(fldPath.Child("ejectionTime"), r.EjectionTime, err.Error())
 		return apierrors.NewInvalid(PlusKind, "ejectionTime", field.ErrorList{err})
 	}
 
-	if d.ConsecutiveErrors <= 0 {
-		err := field.Invalid(fldPath.Child("consecutiveErrors"), d.ConsecutiveErrors, "consecutiveErrors must > 0")
+	if r.ConsecutiveErrors <= 0 {
+		err := field.Invalid(fldPath.Child("consecutiveErrors"), r.ConsecutiveErrors, "consecutiveErrors must > 0")
 		return apierrors.NewInvalid(PlusKind, "consecutiveErrors", field.ErrorList{err})
 	}
 

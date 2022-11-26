@@ -20,31 +20,31 @@ type PlusApp struct {
 	RestartMark string                      `json:"restartMark,omitempty"`
 }
 
-func (d *PlusApp) Validate(fldPath *field.Path) error {
+func (r *PlusApp) Validate(fldPath *field.Path) error {
 	fldPath = fldPath.Child("app")
 
-	if d.Version == "" {
-		err := field.Invalid(fldPath.Child("version"), d.Version, "version can't be empty")
+	if r.Version == "" {
+		err := field.Invalid(fldPath.Child("version"), r.Version, "version can't be empty")
 		return apierrors.NewInvalid(PlusKind, "version", field.ErrorList{err})
 	}
 
-	if d.MinReplicas == 0 {
-		err := field.Invalid(fldPath.Child("minReplicas"), d.MinReplicas, "minReplicas must != 0")
+	if r.MinReplicas == 0 {
+		err := field.Invalid(fldPath.Child("minReplicas"), r.MinReplicas, "minReplicas must != 0")
 		return apierrors.NewInvalid(PlusKind, "minReplicas", field.ErrorList{err})
 	}
 
-	if d.MaxReplicas < d.MinReplicas {
-		err := field.Invalid(fldPath.Child("maxReplicas"), d.MaxReplicas, fmt.Sprintf("maxReplicas must >= minReplicas(%d)", d.MinReplicas))
+	if r.MaxReplicas < r.MinReplicas {
+		err := field.Invalid(fldPath.Child("maxReplicas"), r.MaxReplicas, fmt.Sprintf("maxReplicas must >= minReplicas(%d)", r.MinReplicas))
 		return apierrors.NewInvalid(PlusKind, "maxReplicas", field.ErrorList{err})
 	}
 
-	if d.Port < 0 {
-		err := field.Invalid(fldPath.Child("port"), d.Port, fmt.Sprintf("port must > 0"))
+	if r.Port < 0 {
+		err := field.Invalid(fldPath.Child("port"), r.Port, fmt.Sprintf("port must > 0"))
 		return apierrors.NewInvalid(PlusKind, "port", field.ErrorList{err})
 	}
 
-	if d.Protocol != "http" && d.Protocol != "grpc" && d.Protocol != "none" {
-		err := field.Invalid(fldPath.Child("protocol"), d.Protocol, fmt.Sprintf("protocol must (http or grpc)"))
+	if r.Protocol != "http" && r.Protocol != "grpc" && r.Protocol != "none" {
+		err := field.Invalid(fldPath.Child("protocol"), r.Protocol, fmt.Sprintf("protocol must (http or grpc)"))
 		return apierrors.NewInvalid(PlusKind, "protocol", field.ErrorList{err})
 	}
 

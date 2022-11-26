@@ -34,21 +34,21 @@ func NewService(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, log
 }
 
 // Apply this own resource, create or update
-func (d *Service) Apply() error {
-	for _, app := range d.plus.Spec.Apps {
-		obj, err := d.generate(app)
+func (r *Service) Apply() error {
+	for _, app := range r.plus.Spec.Apps {
+		obj, err := r.generate(app)
 		if err != nil {
 			return err
 		}
 
-		exist, found, err := d.exist(app)
+		exist, found, err := r.exist(app)
 		if err != nil {
 			return err
 		}
 
 		if !exist {
-			d.logger.Info("Not found, create it!")
-			if err := d.client.Create(context.TODO(), obj); err != nil {
+			r.logger.Info("Not found, create it!")
+			if err := r.client.Create(context.TODO(), obj); err != nil {
 				return err
 			}
 			return nil
@@ -58,8 +58,8 @@ func (d *Service) Apply() error {
 				!reflect.DeepEqual(obj.Spec.Selector, found.Spec.Selector) ||
 				!reflect.DeepEqual(obj.Spec.SessionAffinity, found.Spec.SessionAffinity) ||
 				!reflect.DeepEqual(obj.Spec.Type, found.Spec.Type) {
-				d.logger.Info("Updating!")
-				if err := d.client.Update(context.TODO(), obj); err != nil {
+				r.logger.Info("Updating!")
+				if err := r.client.Update(context.TODO(), obj); err != nil {
 					return err
 				}
 			}
@@ -69,52 +69,52 @@ func (d *Service) Apply() error {
 
 }
 
-func (d *Service) UpdateStatus() error {
+func (r *Service) UpdateStatus() error {
 	return nil
 }
 
-func (d *Service) Type() string {
+func (r *Service) Type() string {
 	return "Service"
 }
 
-func (d *Service) generate(app *v1.PlusApp) (*corev1.Service, error) {
+func (r *Service) generate(app *v1.PlusApp) (*corev1.Service, error) {
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      d.plus.GetName(),
-			Namespace: d.plus.GetNamespace(),
-			Labels:    d.plus.GenerateLabels(),
+			Name:      r.plus.GetName(),
+			Namespace: r.plus.GetNamespace(),
+			Labels:    r.plus.GenerateLabels(),
 		},
 		Spec: corev1.ServiceSpec{
 			Type:            corev1.ServiceTypeClusterIP,
-			Selector:        d.plus.GenerateLabels(),
-			Ports:           d.buildPorts(app),
+			Selector:        r.plus.GenerateLabels(),
+			Ports:           r.buildPorts(app),
 			SessionAffinity: "None",
 		},
 	}
 
 	// 绑定关系，删除instance会删除底下所有资源
-	if err := controllerutil.SetControllerReference(d.plus, service, d.scheme); err != nil {
-		d.logger.Error(err, "Set controllerReference failed")
+	if err := controllerutil.SetControllerReference(r.plus, service, r.scheme); err != nil {
+		r.logger.Error(err, "Set controllerReference failed")
 		return nil, err
 	}
 	return service, nil
 }
 
 // Check if the Service already exists
-func (d *Service) exist(app *v1.PlusApp) (bool, *corev1.Service, error) {
+func (r *Service) exist(app *v1.PlusApp) (bool, *corev1.Service, error) {
 	found := &corev1.Service{}
-	err := d.client.Get(context.TODO(), types.NamespacedName{Name: d.plus.GetName(), Namespace: d.plus.GetNamespace()}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetName(), Namespace: r.plus.GetNamespace()}, found)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil, nil
 		}
-		d.logger.Error(err, "Found error")
+		r.logger.Error(err, "Found error")
 		return true, found, err
 	}
 	return true, found, nil
 }
 
-func (d *Service) buildPorts(app *v1.PlusApp) []corev1.ServicePort {
+func (r *Service) buildPorts(app *v1.PlusApp) []corev1.ServicePort {
 	ports := make([]corev1.ServicePort, 0, 1)
 	ports = append(ports, corev1.ServicePort{
 		Name:       fmt.Sprintf("%s-%d", app.Protocol, app.Port),
@@ -123,7 +123,7 @@ func (d *Service) buildPorts(app *v1.PlusApp) []corev1.ServicePort {
 		TargetPort: intstr.FromInt(int(app.Port)),
 	})
 
-	if d.plus.Spec.Type == v1.PlusTypeGateway || d.plus.Spec.Type == v1.PlusTypeSvc {
+	if r.plus.Spec.Type == v1.PlusTypeGateway || r.plus.Spec.Type == v1.PlusTypeSvc {
 		ports = append(ports, corev1.ServicePort{
 			Name:       "pprof",
 			Protocol:   corev1.ProtocolTCP,

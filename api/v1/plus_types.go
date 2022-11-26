@@ -83,78 +83,78 @@ type Plus struct {
 	Status PlusStatus `json:"status,omitempty"`
 }
 
-func (in *Plus) GetName() string {
-	return in.Name
+func (r *Plus) GetName() string {
+	return r.Name
 }
 
-func (in *Plus) GetNamespace() string {
-	return in.Namespace
+func (r *Plus) GetNamespace() string {
+	return r.Namespace
 }
 
-func (in *Plus) GetAppName(app *PlusApp) string {
-	return in.Name + "-" + app.Version
+func (r *Plus) GetAppName(app *PlusApp) string {
+	return r.Name + "-" + app.Version
 }
 
-func (in *Plus) GenerateLabels() map[string]string {
+func (r *Plus) GenerateLabels() map[string]string {
 	labels := make(map[string]string)
-	for k, v := range in.Labels {
+	for k, v := range r.Labels {
 		labels[k] = v
 	}
-	labels["plus"] = in.Name
+	labels["plus"] = r.Name
 	return labels
 }
 
-func (in *Plus) GenerateVersionLabels(app *PlusApp) map[string]string {
+func (r *Plus) GenerateVersionLabels(app *PlusApp) map[string]string {
 	return map[string]string{"version": app.Version}
 }
 
-func (in *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
-	var labels = in.GenerateLabels()
+func (r *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
+	var labels = r.GenerateLabels()
 	labels["version"] = app.Version
 	return labels
 }
 
-func (in *Plus) GenerateStatusDesc() {
-	in.Status.Desc = PlusDesc{}
-	for k, v := range in.Status.AvailableReplicas {
-		in.Status.Desc.AvailableReplicas = in.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", k, v)
+func (r *Plus) GenerateStatusDesc() {
+	r.Status.Desc = PlusDesc{}
+	for k, v := range r.Status.AvailableReplicas {
+		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", k, v)
 	}
-	for _, v := range in.Spec.Apps {
-		in.Status.Desc.Replicas = in.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
+	for _, v := range r.Spec.Apps {
+		r.Status.Desc.Replicas = r.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
-			in.Status.Desc.Images = in.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
+			r.Status.Desc.Images = r.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
 		}
 	}
 
-	if in.Spec.Gateway != nil {
-		for k, v := range in.Spec.Gateway.Weights {
-			in.Status.Desc.Weights = in.Status.Desc.Weights + fmt.Sprintf("%s:%d ", k, v)
+	if r.Spec.Gateway != nil {
+		for k, v := range r.Spec.Gateway.Weights {
+			r.Status.Desc.Weights = r.Status.Desc.Weights + fmt.Sprintf("%s:%d ", k, v)
 		}
 
 	}
 
-	in.Status.Desc.AvailableReplicas = fmt.Sprintf("[%s]", in.Status.Desc.AvailableReplicas)
-	in.Status.Desc.Replicas = fmt.Sprintf("[%s]", in.Status.Desc.Replicas)
-	in.Status.Desc.Images = fmt.Sprintf("[%s]", in.Status.Desc.Images)
-	in.Status.Desc.Weights = fmt.Sprintf("[%s]", in.Status.Desc.Weights)
+	r.Status.Desc.AvailableReplicas = fmt.Sprintf("[%s]", r.Status.Desc.AvailableReplicas)
+	r.Status.Desc.Replicas = fmt.Sprintf("[%s]", r.Status.Desc.Replicas)
+	r.Status.Desc.Images = fmt.Sprintf("[%s]", r.Status.Desc.Images)
+	r.Status.Desc.Weights = fmt.Sprintf("[%s]", r.Status.Desc.Weights)
 }
 
-func (in *Plus) Validate() error {
+func (r *Plus) Validate() error {
 	fldPath := field.NewPath("spec")
-	if e := in.Spec.Policy; e != nil {
+	if e := r.Spec.Policy; e != nil {
 		if err := e.Validate(fldPath); err != nil {
 			return err
 		}
 	}
 
-	if e := in.Spec.Gateway; e != nil {
+	if e := r.Spec.Gateway; e != nil {
 		if err := e.Validate(fldPath); err != nil {
 			return err
 		}
 	}
 
-	for _, e := range in.Spec.Apps {
+	for _, e := range r.Spec.Apps {
 		if err := e.Validate(fldPath); err != nil {
 			return err
 		}

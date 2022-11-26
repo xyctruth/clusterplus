@@ -31,21 +31,21 @@ func NewAutoScaler(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, 
 }
 
 // apply this own resource, create or update
-func (d *AutoScaler) Apply() error {
-	for _, app := range d.plus.Spec.Apps {
-		obj, err := d.generate(app)
+func (r *AutoScaler) Apply() error {
+	for _, app := range r.plus.Spec.Apps {
+		obj, err := r.generate(app)
 		if err != nil {
 			return err
 		}
 
-		exist, found, err := d.exist(app)
+		exist, found, err := r.exist(app)
 		if err != nil {
 			return err
 		}
 
 		if *obj.Spec.MinReplicas == -1 {
 			if exist {
-				if err := d.client.Delete(context.TODO(), obj); err != nil {
+				if err := r.client.Delete(context.TODO(), obj); err != nil {
 					return err
 				}
 			}
@@ -53,8 +53,8 @@ func (d *AutoScaler) Apply() error {
 		}
 
 		if !exist {
-			d.logger.Info("Not found, create it!")
-			if err := d.client.Create(context.TODO(), obj); err != nil {
+			r.logger.Info("Not found, create it!")
+			if err := r.client.Create(context.TODO(), obj); err != nil {
 				return err
 			}
 			return nil
@@ -62,8 +62,8 @@ func (d *AutoScaler) Apply() error {
 		} else {
 			obj.ResourceVersion = found.ResourceVersion
 			if !reflect.DeepEqual(obj.Spec, found.Spec) {
-				d.logger.Info("Updating!")
-				if err := d.client.Update(context.TODO(), obj); err != nil {
+				r.logger.Info("Updating!")
+				if err := r.client.Update(context.TODO(), obj); err != nil {
 					return err
 				}
 			}
@@ -73,20 +73,20 @@ func (d *AutoScaler) Apply() error {
 
 }
 
-func (d *AutoScaler) UpdateStatus() error {
+func (r *AutoScaler) UpdateStatus() error {
 	return nil
 }
 
-func (d *AutoScaler) Type() string {
+func (r *AutoScaler) Type() string {
 	return "AutoScaler"
 }
 
-func (d *AutoScaler) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAutoscaler, error) {
+func (r *AutoScaler) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAutoscaler, error) {
 	targetCPUUtilizationPercentage := int32(80)
-	autoScaler := &autoscalingv1.HorizontalPodAutoscaler{
+	autoscaling := &autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      d.plus.GetAppName(app),
-			Namespace: d.plus.GetNamespace(),
+			Name:      r.plus.GetAppName(app),
+			Namespace: r.plus.GetNamespace(),
 		},
 		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
 			MaxReplicas: app.MaxReplicas,
@@ -94,29 +94,29 @@ func (d *AutoScaler) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAuto
 			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
-				Name:       d.plus.GetAppName(app),
+				Name:       r.plus.GetAppName(app),
 			},
 			TargetCPUUtilizationPercentage: &targetCPUUtilizationPercentage,
 		},
 	}
 
 	// 绑定关系，删除instance会删除底下所有资源
-	if err := controllerutil.SetControllerReference(d.plus, autoScaler, d.scheme); err != nil {
-		d.logger.Error(err, "Set controllerReference failed")
+	if err := controllerutil.SetControllerReference(r.plus, autoscaling, r.scheme); err != nil {
+		r.logger.Error(err, "Set controllerReference failed")
 		return nil, err
 	}
-	return autoScaler, nil
+	return autoscaling, nil
 }
 
-func (d *AutoScaler) exist(app *v1.PlusApp) (bool, *autoscalingv1.HorizontalPodAutoscaler, error) {
+func (r *AutoScaler) exist(app *v1.PlusApp) (bool, *autoscalingv1.HorizontalPodAutoscaler, error) {
 
 	found := &autoscalingv1.HorizontalPodAutoscaler{}
-	err := d.client.Get(context.TODO(), types.NamespacedName{Name: d.plus.GetAppName(app), Namespace: d.plus.GetNamespace()}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetAppName(app), Namespace: r.plus.GetNamespace()}, found)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil, nil
 		}
-		d.logger.Error(err, "Found error")
+		r.logger.Error(err, "Found error")
 		return true, found, err
 	}
 	return true, found, nil

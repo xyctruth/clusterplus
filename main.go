@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"go.uber.org/zap/zapcore"
 	"os"
 
 	"istio.io/client-go/pkg/apis/networking/v1alpha3"
@@ -63,6 +64,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
 		Development: true,
+		TimeEncoder: zapcore.RFC3339TimeEncoder,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()

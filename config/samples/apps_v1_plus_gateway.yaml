@@ -9,21 +9,30 @@ spec:
         - api-fat.tanjingmama.cn
     hosts:
       - api-fat.tanjingmama.cn
-    weights:
+    route: # 指定路由进入环境
+      blue:
+        headersMatch:
+        - MerchantId: "1"
+          MerchantType: "type1"
+      green:
+        headersMatch:
+        - MerchantId: "2"
+          MerchantType: "type2"
+    weights: # 默认路由权重
       blue: 50
       green: 50
   policy:
     timeout: 10s
-    maxRequests: 1000
+    maxRequests: 10000
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx
     outlierDetection:
       consecutiveErrors: 5000
       ejectionPercent: 50
       ejectionTime: 30s
       interval: 10s
-    retries:
-      attempts: 3
-      perTryTimeout: 3s
-      retryOn: 5xx
     fault:
       delay:
         percent: 0

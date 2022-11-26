@@ -34,21 +34,21 @@ func NewDeployment(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, 
 }
 
 // Apply this own resource, create or update
-func (d *Deployment) Apply() error {
-	for _, app := range d.plus.Spec.Apps {
-		obj, err := d.generate(app)
+func (r *Deployment) Apply() error {
+	for _, app := range r.plus.Spec.Apps {
+		obj, err := r.generate(app)
 		if err != nil {
 			return err
 		}
 
-		exist, found, err := d.exist(app)
+		exist, found, err := r.exist(app)
 		if err != nil {
 			return err
 		}
 
 		if *obj.Spec.Replicas == -1 {
 			if exist {
-				if err := d.client.Delete(context.TODO(), obj); err != nil {
+				if err := r.client.Delete(context.TODO(), obj); err != nil {
 					return err
 				}
 			}
@@ -56,8 +56,8 @@ func (d *Deployment) Apply() error {
 		}
 
 		if !exist {
-			d.logger.Info("Not found, create it!")
-			if err := d.client.Create(context.TODO(), obj); err != nil {
+			r.logger.Info("Not found, create it!")
+			if err := r.client.Create(context.TODO(), obj); err != nil {
 				return err
 			}
 		} else {
@@ -73,8 +73,8 @@ func (d *Deployment) Apply() error {
 			}
 
 			if !reflect.DeepEqual(obj.Spec, found.Spec) {
-				d.logger.Info("Updating!")
-				if err := d.client.Update(context.TODO(), obj); err != nil {
+				r.logger.Info("Updating!")
+				if err := r.client.Update(context.TODO(), obj); err != nil {
 					return err
 				}
 			}
@@ -83,30 +83,30 @@ func (d *Deployment) Apply() error {
 	return nil
 }
 
-func (d *Deployment) UpdateStatus() error {
-	if d.plus.Status.AvailableReplicas == nil {
-		d.plus.Status.AvailableReplicas = make(map[string]int32, 0)
+func (r *Deployment) UpdateStatus() error {
+	if r.plus.Status.AvailableReplicas == nil {
+		r.plus.Status.AvailableReplicas = make(map[string]int32, 0)
 	}
 
-	for _, app := range d.plus.Spec.Apps {
+	for _, app := range r.plus.Spec.Apps {
 		found := &appsv1.Deployment{}
-		err := d.client.Get(context.TODO(), types.NamespacedName{Name: d.plus.GetAppName(app), Namespace: d.plus.GetNamespace()}, found)
+		err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetAppName(app), Namespace: r.plus.GetNamespace()}, found)
 		if err != nil {
 			return nil
 		}
-		if !reflect.DeepEqual(d.plus.Status.AvailableReplicas, found.Status.AvailableReplicas) {
-			d.plus.Status.AvailableReplicas[app.Version] = found.Status.AvailableReplicas
+		if !reflect.DeepEqual(r.plus.Status.AvailableReplicas, found.Status.AvailableReplicas) {
+			r.plus.Status.AvailableReplicas[app.Version] = found.Status.AvailableReplicas
 		}
 	}
 
 	return nil
 }
 
-func (d *Deployment) Type() string {
+func (r *Deployment) Type() string {
 	return "Deployment"
 }
 
-func (d *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
+func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	hostPathType := corev1.HostPathType("")
 	terminationGracePeriodSeconds := int64(30)
 	progressDeadlineSeconds := int32(600)
@@ -114,23 +114,23 @@ func (d *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	// 构建k8s Deployment
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        d.plus.GetAppName(app),
-			Namespace:   d.plus.GetNamespace(),
-			Labels:      d.plus.GenerateAppLabels(app),
-			Annotations: d.plus.Annotations,
+			Name:        r.plus.GetAppName(app),
+			Namespace:   r.plus.GetNamespace(),
+			Labels:      r.plus.GenerateAppLabels(app),
+			Annotations: r.plus.Annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			ProgressDeadlineSeconds: &progressDeadlineSeconds,
 			RevisionHistoryLimit:    &revisionHistoryLimit,
-			Replicas:                d.buildReplicas(app),
+			Replicas:                r.buildReplicas(app),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: d.plus.GenerateAppLabels(app),
+				MatchLabels: r.plus.GenerateAppLabels(app),
 			},
-			Strategy: d.buildStrategy(),
+			Strategy: r.buildStrategy(),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      d.plus.GenerateAppLabels(app),
-					Annotations: d.buildAnnotations(app),
+					Labels:      r.plus.GenerateAppLabels(app),
+					Annotations: r.buildAnnotations(app),
 				},
 				Spec: corev1.PodSpec{
 					InitContainers:                nil,
@@ -142,13 +142,13 @@ func (d *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 					Containers: []corev1.Container{{
 						Image:                    app.Image,
 						ImagePullPolicy:          corev1.PullAlways,
-						Name:                     d.plus.GetAppName(app),
-						Ports:                    d.buildPorts(app),
+						Name:                     r.plus.GetAppName(app),
+						Ports:                    r.buildPorts(app),
 						Resources:                app.Resources,
 						Env:                      app.Env,
 						Command:                  nil,
-						ReadinessProbe:           d.buildReadinessProbe(app),
-						LivenessProbe:            d.buildLivelinessProbe(app),
+						ReadinessProbe:           r.buildReadinessProbe(app),
+						LivenessProbe:            r.buildLivelinessProbe(app),
 						TerminationMessagePath:   "/dev/termination-log",
 						TerminationMessagePolicy: "File",
 						VolumeMounts: []corev1.VolumeMount{
@@ -192,34 +192,34 @@ func (d *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	}
 
 	// 绑定关系，删除instance会删除底下所有资源
-	if err := controllerutil.SetControllerReference(d.plus, deployment, d.scheme); err != nil {
-		d.logger.Error(err, "Set controllerReference failed")
+	if err := controllerutil.SetControllerReference(r.plus, deployment, r.scheme); err != nil {
+		r.logger.Error(err, "Set controllerReference failed")
 		return nil, err
 	}
 	return deployment, nil
 }
 
 // Check if the Deployment already exists
-func (d *Deployment) exist(app *v1.PlusApp) (bool, *appsv1.Deployment, error) {
+func (r *Deployment) exist(app *v1.PlusApp) (bool, *appsv1.Deployment, error) {
 
 	found := &appsv1.Deployment{}
-	err := d.client.Get(context.TODO(), types.NamespacedName{Name: d.plus.GetAppName(app), Namespace: d.plus.GetNamespace()}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetAppName(app), Namespace: r.plus.GetNamespace()}, found)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil, nil
 		}
-		d.logger.Error(err, "Found error")
+		r.logger.Error(err, "Found error")
 		return true, found, err
 	}
 	return true, found, nil
 }
 
-func (d *Deployment) buildReplicas(app *v1.PlusApp) *int32 {
+func (r *Deployment) buildReplicas(app *v1.PlusApp) *int32 {
 	return &app.MinReplicas
 
 }
 
-func (d *Deployment) buildStrategy() appsv1.DeploymentStrategy {
+func (r *Deployment) buildStrategy() appsv1.DeploymentStrategy {
 	maxSurge := intstr.FromString("25%")
 	maxUnavailable := intstr.FromString("25%")
 	return appsv1.DeploymentStrategy{
@@ -231,7 +231,7 @@ func (d *Deployment) buildStrategy() appsv1.DeploymentStrategy {
 	}
 }
 
-func (d *Deployment) buildPorts(app *v1.PlusApp) []corev1.ContainerPort {
+func (r *Deployment) buildPorts(app *v1.PlusApp) []corev1.ContainerPort {
 
 	ports := make([]corev1.ContainerPort, 0, 1)
 	ports = append(ports, corev1.ContainerPort{
@@ -242,7 +242,7 @@ func (d *Deployment) buildPorts(app *v1.PlusApp) []corev1.ContainerPort {
 	return ports
 }
 
-func (d *Deployment) buildReadinessProbe(app *v1.PlusApp) *corev1.Probe {
+func (r *Deployment) buildReadinessProbe(app *v1.PlusApp) *corev1.Probe {
 
 	//if app.Protocol == "http" {
 	//	return &corev1.Probe{
@@ -267,7 +267,7 @@ func (d *Deployment) buildReadinessProbe(app *v1.PlusApp) *corev1.Probe {
 	//	return &corev1.Probe{
 	//		ProbeHandler: corev1.ProbeHandler{
 	//			Exec: &corev1.ExecAction{
-	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%d", app.Port)},
+	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%r", app.Port)},
 	//				Command: []string{"ls"},
 	//			},
 	//		},
@@ -281,7 +281,7 @@ func (d *Deployment) buildReadinessProbe(app *v1.PlusApp) *corev1.Probe {
 	return nil
 }
 
-func (d *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
+func (r *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
 	//if app.Protocol == "http" {
 	//	return &corev1.Probe{
 	//		ProbeHandler: corev1.ProbeHandler{
@@ -305,7 +305,7 @@ func (d *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
 	//	return &corev1.Probe{
 	//		ProbeHandler: corev1.ProbeHandler{
 	//			Exec: &corev1.ExecAction{
-	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%d", app.Port)},
+	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%r", app.Port)},
 	//				Command: []string{"ls"},
 	//			},
 	//		},
@@ -319,7 +319,7 @@ func (d *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
 	return nil
 }
 
-func (d *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
+func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 	m := make(map[string]string)
 	m["apps.clusterplus.io/restart-mark"] = app.RestartMark
 	return m

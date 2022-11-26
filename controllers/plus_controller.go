@@ -59,9 +59,6 @@ type PlusReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
-
-	log.Info("*********************************************************************")
-
 	//if !plusappsv1.CONFIG.FilterRequest(req.Version) {
 	//	log.WithValues("config", plusappsv1.CONFIG).WithValues("req", req.Version).Info("Reconcile cancel,this req filter is false ")
 	//	return ctrl.Result{}, nil

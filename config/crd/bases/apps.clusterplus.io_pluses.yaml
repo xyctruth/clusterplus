@@ -257,8 +257,17 @@ spec:
                     items:
                       type: string
                     type: array
-                  urlPrefix:
-                    type: string
+                  route:
+                    additionalProperties:
+                      properties:
+                        headersMatch:
+                          items:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type: array
+                      type: object
+                    type: object
                   weights:
                     additionalProperties:
                       format: int32
