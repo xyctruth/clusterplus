@@ -1,2 +1,2 @@
-GET https://api-fat.tanjingmama.cn/gateway/request-svc-a
+GET https://api-fat.tanjingmama.cn/gateway
 VERSION: blue
