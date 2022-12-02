@@ -6,53 +6,45 @@ spec:
   policy:
     timeout: 10s
     maxRequests: 1000
-    outlierDetection:
-      consecutiveErrors: 5000
-      ejectionPercent: 50
-      ejectionTime: 30s
-      interval: 10s
     retries:
       attempts: 3
-      perTryTimeout: 3s
+      perTryTimeout: 2s
       retryOn: 5xx
-    fault:
-      delay:
-        percent: 0
-        delay: 5s
-      abort:
-        percent: 0
-        httpStatus: 500
+    outlierDetection:
+      consecutiveErrors: 5000
+      ejectionPercent: 100
+      ejectionTime: 30s
+      interval: 10s
   apps:
     - version: blue
       env:
         - name: VERSION
           value: blue_version
-      image: xyctruth/plus-test:v0.0.3
-      maxReplicas: 1
+      image: xyctruth/plus-test:v0.0.8
       minReplicas: 1
+      maxReplicas: 10
       port: 8080
       protocol: http
       resources:
         limits:
           cpu: 200m
-          memory: 1Gi
+          memory: 500Mi
         requests:
           cpu: 100m
-          memory: 100Mi
+          memory: 250Mi
     - version: green
       env:
         - name: VERSION
           value: green_version
-      image: xyctruth/plus-test:v0.0.3
-      maxReplicas: 1
+      image: xyctruth/plus-test:v0.0.8
       minReplicas: 1
+      maxReplicas: 10
       port: 8080
       protocol: http
       resources:
         limits:
           cpu: 200m
-          memory: 1Gi
+          memory: 500Mi
         requests:
           cpu: 100m
-          memory: 100Mi
-
+          memory: 250Mi
