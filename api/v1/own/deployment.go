@@ -133,6 +133,9 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 					Annotations: r.buildAnnotations(app),
 				},
 				Spec: corev1.PodSpec{
+					ImagePullSecrets: []corev1.LocalObjectReference{
+						{Name: app.ImagePullSecrets},
+					},
 					InitContainers:                nil,
 					RestartPolicy:                 corev1.RestartPolicyAlways,
 					DNSPolicy:                     corev1.DNSClusterFirst,

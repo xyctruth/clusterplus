@@ -18,7 +18,9 @@ package v1
 
 import (
 	"fmt"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"strings"
 )
@@ -39,12 +41,6 @@ type PlusSpec struct {
 }
 
 type PlusType string
-
-const (
-	PlusTypeGateway = "gateway"
-	PlusTypeSvc     = "svc"
-	PlusTypeWeb     = "web"
-)
 
 // PlusStatus defines the observed state of Plus
 type PlusStatus struct {
@@ -141,6 +137,11 @@ func (r *Plus) GenerateStatusDesc() {
 }
 
 func (r *Plus) Validate() error {
+	if msgs := validation.IsDNS1123Label(r.Name); len(msgs) != 0 {
+		err := field.Invalid(field.NewPath(r.Name), r.Name, fmt.Sprintf("%v", msgs))
+		return apierrors.NewInvalid(PlusKind, "name", field.ErrorList{err})
+	}
+
 	fldPath := field.NewPath("spec")
 	if e := r.Spec.Policy; e != nil {
 		if err := e.Validate(fldPath); err != nil {

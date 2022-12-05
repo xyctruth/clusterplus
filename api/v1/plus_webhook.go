@@ -41,7 +41,6 @@ var _ webhook.Defaulter = &Plus{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *Plus) Default() {
 	pluslog.Info("default", "name", r.Name)
-
 	for _, app := range r.Spec.Apps {
 		if app.MaxReplicas == 0 {
 			app.MaxReplicas = app.MinReplicas

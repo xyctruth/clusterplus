@@ -7,14 +7,14 @@ spec:
     timeout: 10s
     maxRequests: 1000
     retries:
-      attempts: 3
+      attempts: 5000
       perTryTimeout: 2s
       retryOn: 5xx
     outlierDetection:
-      consecutiveErrors: 5000
+      consecutiveErrors: 5
       ejectionPercent: 100
       ejectionTime: 30s
-      interval: 10s
+      interval: 100s
   apps:
     - version: blue
       env:

@@ -9,15 +9,16 @@ import (
 )
 
 type PlusApp struct {
-	Version     string                      `json:"version,omitempty"`
-	Image       string                      `json:"image,omitempty"`
-	Env         []corev1.EnvVar             `json:"env,omitempty"`
-	MinReplicas int32                       `json:"minReplicas,omitempty"`
-	MaxReplicas int32                       `json:"maxReplicas,omitempty"`
-	Resources   corev1.ResourceRequirements `json:"resources,omitempty"`
-	Port        int32                       `json:"port,omitempty"`
-	Protocol    string                      `json:"protocol,omitempty"`
-	RestartMark string                      `json:"restartMark,omitempty"`
+	Version          string                      `json:"version,omitempty"`
+	Image            string                      `json:"image,omitempty"`
+	ImagePullSecrets string                      `json:"imagePullSecrets,omitempty"`
+	Env              []corev1.EnvVar             `json:"env,omitempty"`
+	MinReplicas      int32                       `json:"minReplicas,omitempty"`
+	MaxReplicas      int32                       `json:"maxReplicas,omitempty"`
+	Resources        corev1.ResourceRequirements `json:"resources,omitempty"`
+	Port             int32                       `json:"port,omitempty"`
+	Protocol         string                      `json:"protocol,omitempty"`
+	RestartMark      string                      `json:"restartMark,omitempty"`
 }
 
 func (r *PlusApp) Validate(fldPath *field.Path) error {

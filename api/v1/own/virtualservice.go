@@ -87,7 +87,9 @@ func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
 			Fault:      r.generateFault(),
 			Retries:    r.generateRetries(),
 			CorsPolicy: r.generateCorsPolicy(),
-			Timeout:    r.plus.Spec.Policy.GetTimeout(),
+		}
+		if r.plus.Spec.Policy != nil {
+			httpRoute.Timeout = r.plus.Spec.Policy.GetTimeout()
 		}
 		httpRoutes = append(httpRoutes, httpRoute)
 	}
@@ -317,7 +319,7 @@ func (r *VirtualService) generateDefaultRoute() []*istioapiv1.HTTPRouteDestinati
 }
 
 func (r *VirtualService) generateRetries() *istioapiv1.HTTPRetry {
-	if r.plus.Spec.Policy.Retries == nil {
+	if r.plus.Spec.Policy == nil || r.plus.Spec.Policy.Retries == nil {
 		return nil
 	}
 	return &istioapiv1.HTTPRetry{

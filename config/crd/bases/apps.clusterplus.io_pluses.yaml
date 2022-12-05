@@ -185,6 +185,8 @@ spec:
                       type: array
                     image:
                       type: string
+                    imagePullSecrets:
+                      type: string
                     maxReplicas:
                       format: int32
                       type: integer

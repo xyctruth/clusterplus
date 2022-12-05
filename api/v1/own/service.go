@@ -122,14 +122,5 @@ func (r *Service) buildPorts(app *v1.PlusApp) []corev1.ServicePort {
 		Port:       app.Port,
 		TargetPort: intstr.FromInt(int(app.Port)),
 	})
-
-	if r.plus.Spec.Type == v1.PlusTypeGateway || r.plus.Spec.Type == v1.PlusTypeSvc {
-		ports = append(ports, corev1.ServicePort{
-			Name:       "pprof",
-			Protocol:   corev1.ProtocolTCP,
-			Port:       9000,
-			TargetPort: intstr.FromInt(9000),
-		})
-	}
 	return ports
 }

@@ -9,18 +9,16 @@ spec:
         - api-fat.tanjingmama.cn
     hosts:
       - api-fat.tanjingmama.cn
+    weights: # 默认路由权重
+      blue: 50
+      green: 50
     route: # 指定路由进入环境
       blue:
         headersMatch:
         - MerchantId: "1"
-          MerchantType: "type1"
       green:
         headersMatch:
         - MerchantId: "2"
-          MerchantType: "type2"
-    weights: # 默认路由权重
-      blue: 50
-      green: 50
   policy:
     timeout: 10s
     maxRequests: 10000
@@ -39,6 +37,7 @@ spec:
         - name: VERSION
           value: blue_version
       image: xyctruth/plus-test:v0.0.10
+      imagePullSecrets: asd
       minReplicas: 1
       maxReplicas: 10
       port: 8080
