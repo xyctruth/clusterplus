@@ -7,10 +7,11 @@ import (
 )
 
 type PlusGateway struct {
-	Hosts   []string                     `json:"hosts,omitempty"`
-	Cors    *PlusGatewayCors             `json:"cors,omitempty"`
-	Weights map[string]int32             `json:"weights,omitempty"`
-	Route   map[string]*PlusGatewayRoute `json:"route,omitempty"`
+	Hosts      []string                     `json:"hosts,omitempty"`
+	Cors       *PlusGatewayCors             `json:"cors,omitempty"`
+	Weights    map[string]int32             `json:"weights,omitempty"`
+	Route      map[string]*PlusGatewayRoute `json:"route,omitempty"`
+	PathPrefix *string                      `json:"pathPrefix,omitempty"`
 }
 
 type PlusGatewayRoute struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"reflect"
+	"strings"
 
 	v1 "clusterplus.io/clusterplus/api/v1"
 	"github.com/go-logr/logr"
@@ -156,6 +157,20 @@ func (r *VirtualService) generateGateway() []string {
 	return []string{"istio-system/gateway"}
 }
 
+func (r *VirtualService) generatePrefixPath() string {
+	prefixPath := ""
+	if r.plus.Spec.Gateway.PathPrefix == nil {
+		prefixPath = fmt.Sprintf("/%s", r.plus.GetName())
+	} else {
+		if strings.HasPrefix(*r.plus.Spec.Gateway.PathPrefix, "/") {
+			prefixPath = *r.plus.Spec.Gateway.PathPrefix
+		} else {
+			prefixPath = fmt.Sprintf("/%s", *r.plus.Spec.Gateway.PathPrefix)
+		}
+	}
+	return prefixPath
+}
+
 func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchRequest {
 	if r.plus.Spec.Gateway == nil {
 		return []*istioapiv1.HTTPMatchRequest{
@@ -185,7 +200,7 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 					Headers: headers,
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s/", r.plus.GetName()),
+							Prefix: fmt.Sprintf("%s/", r.generatePrefixPath()),
 						},
 					},
 				},
@@ -193,7 +208,7 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 					Headers: headers,
 					Uri: &istioapiv1.StringMatch{
 						MatchType: &istioapiv1.StringMatch_Prefix{
-							Prefix: fmt.Sprintf("/%s", r.plus.GetName()),
+							Prefix: fmt.Sprintf("%s", r.generatePrefixPath()),
 						},
 					},
 				},
@@ -215,7 +230,7 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 			Headers: defaultHeaders,
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/", r.plus.GetName()),
+					Prefix: fmt.Sprintf("%s/", r.generatePrefixPath()),
 				},
 			},
 		},
@@ -223,7 +238,7 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 			Headers: defaultHeaders,
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s", r.plus.GetName()),
+					Prefix: fmt.Sprintf("%s", r.generatePrefixPath()),
 				},
 			},
 		},
@@ -234,14 +249,14 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/%s/", app.Version, r.plus.GetName()),
+					Prefix: fmt.Sprintf("/%s%s/", app.Version, r.generatePrefixPath()),
 				},
 			},
 		},
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/%s", app.Version, r.plus.GetName()),
+					Prefix: fmt.Sprintf("/%s%s", app.Version, r.generatePrefixPath()),
 				},
 			},
 		},
@@ -259,14 +274,14 @@ func (r *VirtualService) generateDefaultMatches() []*istioapiv1.HTTPMatchRequest
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s/", r.plus.GetName()),
+					Prefix: fmt.Sprintf("%s/", r.generatePrefixPath()),
 				},
 			},
 		},
 		{
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s", r.plus.GetName()),
+					Prefix: fmt.Sprintf("%s", r.generatePrefixPath()),
 				},
 			},
 		},

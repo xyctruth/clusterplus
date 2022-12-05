@@ -259,6 +259,8 @@ spec:
                     items:
                       type: string
                     type: array
+                  pathPrefix:
+                    type: string
                   route:
                     additionalProperties:
                       properties:

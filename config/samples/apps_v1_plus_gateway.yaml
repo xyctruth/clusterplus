@@ -12,6 +12,7 @@ spec:
     weights: # 默认路由权重
       blue: 50
       green: 50
+    #pathPrefix: ""
     route: # 指定路由进入环境
       blue:
         headersMatch:
