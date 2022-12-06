@@ -103,7 +103,9 @@ func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
 			Fault:      r.generateFault(),
 			Retries:    r.generateRetries(),
 			CorsPolicy: r.generateCorsPolicy(),
-			Timeout:    r.plus.Spec.Policy.GetTimeout(),
+		}
+		if r.plus.Spec.Policy != nil {
+			httpRoute.Timeout = r.plus.Spec.Policy.GetTimeout()
 		}
 		httpRoutes = append(httpRoutes, httpRoute)
 	}
@@ -161,14 +163,18 @@ func (r *VirtualService) generatePrefixPath() string {
 	prefixPath := ""
 	if r.plus.Spec.Gateway.PathPrefix == nil {
 		prefixPath = fmt.Sprintf("/%s", r.plus.GetName())
-	} else {
-		if strings.HasPrefix(*r.plus.Spec.Gateway.PathPrefix, "/") {
-			prefixPath = *r.plus.Spec.Gateway.PathPrefix
-		} else {
-			prefixPath = fmt.Sprintf("/%s", *r.plus.Spec.Gateway.PathPrefix)
-		}
+		return prefixPath
 	}
-	return prefixPath
+
+	if *r.plus.Spec.Gateway.PathPrefix == "" {
+		return ""
+	}
+
+	if strings.HasPrefix(*r.plus.Spec.Gateway.PathPrefix, "/") {
+		return *r.plus.Spec.Gateway.PathPrefix
+	} else {
+		return fmt.Sprintf("/%s", *r.plus.Spec.Gateway.PathPrefix)
+	}
 }
 
 func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchRequest {
@@ -239,24 +245,6 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchR
 			Uri: &istioapiv1.StringMatch{
 				MatchType: &istioapiv1.StringMatch_Prefix{
 					Prefix: fmt.Sprintf("%s", r.generatePrefixPath()),
-				},
-			},
-		},
-	}...)
-
-	// 匹配默认版本路径
-	matches = append(matches, []*istioapiv1.HTTPMatchRequest{
-		{
-			Uri: &istioapiv1.StringMatch{
-				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s%s/", app.Version, r.generatePrefixPath()),
-				},
-			},
-		},
-		{
-			Uri: &istioapiv1.StringMatch{
-				MatchType: &istioapiv1.StringMatch_Prefix{
-					Prefix: fmt.Sprintf("/%s%s", app.Version, r.generatePrefixPath()),
 				},
 			},
 		},

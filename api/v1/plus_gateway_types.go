@@ -34,8 +34,7 @@ func (r *PlusGateway) Validate(fldPath *field.Path) error {
 	}
 
 	if r.Weights == nil || len(r.Weights) == 0 {
-		err := field.Invalid(fldPath.Child("weights"), r.Weights, "weights can't be empty")
-		return apierrors.NewInvalid(PlusKind, "weights", field.ErrorList{err})
+		return nil
 	}
 
 	var sum int32
