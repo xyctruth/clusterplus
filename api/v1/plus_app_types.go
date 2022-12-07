@@ -19,6 +19,12 @@ type PlusApp struct {
 	Port             int32                       `json:"port,omitempty"`
 	Protocol         string                      `json:"protocol,omitempty"`
 	RestartMark      string                      `json:"restartMark,omitempty"`
+	ReadinessProbe   *PlusAppProbe               `json:"readinessProbe,omitempty"`
+	LivenessProbe    *PlusAppProbe               `json:"livenessProbe,omitempty"`
+}
+
+type PlusAppProbe struct {
+	HttpPath string `json:"httpPath,omitempty"`
 }
 
 func (r *PlusApp) Validate(fldPath *field.Path) error {

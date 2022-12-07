@@ -187,6 +187,11 @@ spec:
                       type: string
                     imagePullSecrets:
                       type: string
+                    livenessProbe:
+                      properties:
+                        httpPath:
+                          type: string
+                      type: object
                     maxReplicas:
                       format: int32
                       type: integer
@@ -198,6 +203,11 @@ spec:
                       type: integer
                     protocol:
                       type: string
+                    readinessProbe:
+                      properties:
+                        httpPath:
+                          type: string
+                      type: object
                     resources:
                       description: ResourceRequirements describes the compute resource
                         requirements.

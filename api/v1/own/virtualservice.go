@@ -321,6 +321,7 @@ func (r *VirtualService) generateDefaultRoute() []*istioapiv1.HTTPRouteDestinati
 	return routeDestinations
 }
 
+// generateRetries 生成重试策略
 func (r *VirtualService) generateRetries() *istioapiv1.HTTPRetry {
 	if r.plus.Spec.Policy == nil || r.plus.Spec.Policy.Retries == nil {
 		return nil
@@ -336,9 +337,7 @@ func (r *VirtualService) generateFault() *istioapiv1.HTTPFaultInjection {
 	if r.plus.Spec.Policy == nil || r.plus.Spec.Policy.Fault == nil {
 		return nil
 	}
-
 	fault := &istioapiv1.HTTPFaultInjection{}
-
 	if r.plus.Spec.Policy.Fault.Delay != nil {
 		fault.Delay = &istioapiv1.HTTPFaultInjection_Delay{
 			Percentage: r.plus.Spec.Policy.Fault.Delay.GetPercent(),
@@ -347,7 +346,6 @@ func (r *VirtualService) generateFault() *istioapiv1.HTTPFaultInjection {
 			},
 		}
 	}
-
 	if r.plus.Spec.Policy.Fault.Abort != nil {
 		fault.Abort = &istioapiv1.HTTPFaultInjection_Abort{
 			Percentage: r.plus.Spec.Policy.Fault.Abort.GetPercent(),

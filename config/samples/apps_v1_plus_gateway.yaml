@@ -4,9 +4,6 @@ metadata:
   name: gateway
 spec:
   gateway:
-    cors:
-      allowOrigins:
-        - api-fat.tanjingmama.cn
     hosts:
       - api-fat.tanjingmama.cn
     weights: # 默认路由权重
@@ -38,7 +35,7 @@ spec:
         - name: VERSION
           value: blue_version
       image: xyctruth/plus-test:v0.0.10
-      imagePullSecrets: asd
+      imagePullSecrets: imageSecretName
       minReplicas: 1
       maxReplicas: 10
       port: 8080
@@ -50,6 +47,10 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
+      readinessProbe:
+        httpPath: /
+      livenessProbe:
+        httpPath: /
     - version: green
       env:
         - name: VERSION

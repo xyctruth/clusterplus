@@ -14,24 +14,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-type AutoScaler struct {
+type AutoScaling struct {
 	plus   *v1.Plus
 	scheme *runtime.Scheme
 	logger logr.Logger
 	client client.Client
 }
 
-func NewAutoScaler(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, logger logr.Logger) *AutoScaler {
-	d := &AutoScaler{
+func NewAutoScaling(plus *v1.Plus, scheme *runtime.Scheme, client client.Client, logger logr.Logger) *AutoScaling {
+	d := &AutoScaling{
 		plus:   plus,
-		logger: logger.WithValues("Own", "AutoScaler"),
+		logger: logger.WithValues("Own", "AutoScaling"),
 		scheme: scheme,
 		client: client}
 	return d
 }
 
-// apply this own resource, create or update
-func (r *AutoScaler) Apply() error {
+// Apply this own resource, create or update
+func (r *AutoScaling) Apply() error {
 	for _, app := range r.plus.Spec.Apps {
 		obj, err := r.generate(app)
 		if err != nil {
@@ -73,15 +73,15 @@ func (r *AutoScaler) Apply() error {
 
 }
 
-func (r *AutoScaler) UpdateStatus() error {
+func (r *AutoScaling) UpdateStatus() error {
 	return nil
 }
 
-func (r *AutoScaler) Type() string {
-	return "AutoScaler"
+func (r *AutoScaling) Type() string {
+	return "AutoScaling"
 }
 
-func (r *AutoScaler) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAutoscaler, error) {
+func (r *AutoScaling) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAutoscaler, error) {
 	targetCPUUtilizationPercentage := int32(80)
 	autoscaling := &autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
@@ -108,7 +108,7 @@ func (r *AutoScaler) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAuto
 	return autoscaling, nil
 }
 
-func (r *AutoScaler) exist(app *v1.PlusApp) (bool, *autoscalingv1.HorizontalPodAutoscaler, error) {
+func (r *AutoScaling) exist(app *v1.PlusApp) (bool, *autoscalingv1.HorizontalPodAutoscaler, error) {
 
 	found := &autoscalingv1.HorizontalPodAutoscaler{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetAppName(app), Namespace: r.plus.GetNamespace()}, found)

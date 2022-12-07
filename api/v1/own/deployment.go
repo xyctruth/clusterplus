@@ -1,10 +1,8 @@
 package own
 
 import (
-	"context"
-	"reflect"
-
 	v1 "clusterplus.io/clusterplus/api/v1"
+	"context"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -13,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -246,80 +245,37 @@ func (r *Deployment) buildPorts(app *v1.PlusApp) []corev1.ContainerPort {
 }
 
 func (r *Deployment) buildReadinessProbe(app *v1.PlusApp) *corev1.Probe {
-
-	//if app.Protocol == "http" {
-	//	return &corev1.Probe{
-	//		ProbeHandler: corev1.ProbeHandler{
-	//			HTTPGet: &corev1.HTTPGetAction{
-	//				Path: "/",
-	//				Port: intstr.IntOrString{
-	//					IntVal: app.Port,
-	//				},
-	//				Scheme: "HTTP",
-	//			},
-	//		},
-	//		InitialDelaySeconds: 5,
-	//		PeriodSeconds:       5,
-	//		SuccessThreshold:    1,
-	//		FailureThreshold:    10,
-	//		TimeoutSeconds:      10,
-	//	}
-	//}
-	//
-	//if app.Protocol == "grpc" {
-	//	return &corev1.Probe{
-	//		ProbeHandler: corev1.ProbeHandler{
-	//			Exec: &corev1.ExecAction{
-	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%r", app.Port)},
-	//				Command: []string{"ls"},
-	//			},
-	//		},
-	//		InitialDelaySeconds: 5,
-	//		PeriodSeconds:       5,
-	//		SuccessThreshold:    1,
-	//		FailureThreshold:    10,
-	//		TimeoutSeconds:      10,
-	//	}
-	//}
-	return nil
+	return r.buildProbe(app.ReadinessProbe, app.Port)
 }
 
 func (r *Deployment) buildLivelinessProbe(app *v1.PlusApp) *corev1.Probe {
-	//if app.Protocol == "http" {
-	//	return &corev1.Probe{
-	//		ProbeHandler: corev1.ProbeHandler{
-	//			HTTPGet: &corev1.HTTPGetAction{
-	//				Path: "/ping",
-	//				Port: intstr.IntOrString{
-	//					IntVal: app.Port,
-	//				},
-	//				Scheme: "HTTP",
-	//			},
-	//		},
-	//		InitialDelaySeconds: 60,
-	//		PeriodSeconds:       10,
-	//		SuccessThreshold:    1,
-	//		FailureThreshold:    10,
-	//		TimeoutSeconds:      10,
-	//	}
-	//}
-	//
-	//if app.Protocol == "grpc" {
-	//	return &corev1.Probe{
-	//		ProbeHandler: corev1.ProbeHandler{
-	//			Exec: &corev1.ExecAction{
-	//				//Command: []string{"/bin/grpc_health_probe", fmt.Sprintf("-addr=:%r", app.Port)},
-	//				Command: []string{"ls"},
-	//			},
-	//		},
-	//		InitialDelaySeconds: 60,
-	//		PeriodSeconds:       10,
-	//		SuccessThreshold:    1,
-	//		FailureThreshold:    10,
-	//		TimeoutSeconds:      10,
-	//	}
-	//}
-	return nil
+	return r.buildProbe(app.LivenessProbe, app.Port)
+}
+
+func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Probe {
+	if probe == nil {
+		return nil
+	}
+	p := &corev1.Probe{
+		InitialDelaySeconds: 1,
+		PeriodSeconds:       3,
+		SuccessThreshold:    1,
+		FailureThreshold:    3,
+		TimeoutSeconds:      5,
+	}
+
+	if probe.HttpPath != "" {
+		p.ProbeHandler = corev1.ProbeHandler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path: "/",
+				Port: intstr.IntOrString{
+					IntVal: port,
+				},
+				Scheme: "HTTP",
+			},
+		}
+	}
+	return p
 }
 
 func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
