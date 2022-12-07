@@ -36,9 +36,3 @@ jobs:
         run: |
           make docker-build docker-push  IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
 
-      - name: Deploy
-        id: deploy
-        run: |
-          echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 -d > /tmp/config
-          export KUBECONFIG=/tmp/config
-          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
