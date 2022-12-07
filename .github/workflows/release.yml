@@ -8,6 +8,7 @@ on:
 jobs:
   docker_build_push:
     runs-on: ubuntu-latest
+    environment: kfpt-fat
     steps:
       - name: Install Go
         uses: actions/setup-go@v3
@@ -34,3 +35,10 @@ jobs:
         id: docker_build_push
         run: |
           make docker-build docker-push  IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 -d > /tmp/config
+          export KUBECONFIG=/tmp/config
+          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
