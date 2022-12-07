@@ -113,20 +113,19 @@ func (r *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
 func (r *Plus) GenerateStatusDesc() {
 	r.Status.Desc = PlusDesc{}
 	for _, v := range r.Spec.Apps {
-		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", v.Version, r.Status.AvailableReplicas[v.Version])
+		key := v.Version
+		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", v.Version, r.Status.AvailableReplicas[key])
 		r.Status.Desc.Replicas = r.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
 			r.Status.Desc.Images = r.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
 		}
-	}
-
-	if r.Spec.Gateway != nil {
-		for k, v := range r.Spec.Gateway.Weights {
-			r.Status.Desc.Weights = r.Status.Desc.Weights + fmt.Sprintf("%s:%d ", k, v)
+		if r.Spec.Gateway != nil {
+			if w, ok := r.Spec.Gateway.Weights[key]; ok {
+				r.Status.Desc.Weights = r.Status.Desc.Weights + fmt.Sprintf("%s:%d ", key, w)
+			}
 		}
 	}
-
 	r.Status.Desc.AvailableReplicas = fmt.Sprintf("[%s]", r.Status.Desc.AvailableReplicas)
 	r.Status.Desc.Replicas = fmt.Sprintf("[%s]", r.Status.Desc.Replicas)
 	r.Status.Desc.Images = fmt.Sprintf("[%s]", r.Status.Desc.Images)
@@ -134,8 +133,8 @@ func (r *Plus) GenerateStatusDesc() {
 }
 
 func (r *Plus) Validate() error {
-	if msgs := validation.IsDNS1123Label(r.Name); len(msgs) != 0 {
-		err := field.Invalid(field.NewPath(r.Name), r.Name, fmt.Sprintf("%v", msgs))
+	if errs := validation.IsDNS1123Label(r.Name); len(errs) != 0 {
+		err := field.Invalid(field.NewPath(r.Name), r.Name, fmt.Sprintf("%v", errs))
 		return apierrors.NewInvalid(PlusKind, "name", field.ErrorList{err})
 	}
 
