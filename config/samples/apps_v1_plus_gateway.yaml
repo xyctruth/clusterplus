@@ -34,6 +34,10 @@ spec:
       env:
         - name: VERSION
           value: blue_version
+        - name: ENV
+          value: fat
+        - name: ENV
+          value: fat
       image: xyctruth/plus-test:v0.0.10
       imagePullSecrets: imageSecretName
       minReplicas: 1

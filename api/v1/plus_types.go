@@ -112,10 +112,8 @@ func (r *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
 
 func (r *Plus) GenerateStatusDesc() {
 	r.Status.Desc = PlusDesc{}
-	for k, v := range r.Status.AvailableReplicas {
-		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", k, v)
-	}
 	for _, v := range r.Spec.Apps {
+		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", v.Version, r.Status.AvailableReplicas[v.Version])
 		r.Status.Desc.Replicas = r.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
@@ -127,7 +125,6 @@ func (r *Plus) GenerateStatusDesc() {
 		for k, v := range r.Spec.Gateway.Weights {
 			r.Status.Desc.Weights = r.Status.Desc.Weights + fmt.Sprintf("%s:%d ", k, v)
 		}
-
 	}
 
 	r.Status.Desc.AvailableReplicas = fmt.Sprintf("[%s]", r.Status.Desc.AvailableReplicas)

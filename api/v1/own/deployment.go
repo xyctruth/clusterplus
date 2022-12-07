@@ -93,9 +93,7 @@ func (r *Deployment) UpdateStatus() error {
 		if err != nil {
 			return nil
 		}
-		if !reflect.DeepEqual(r.plus.Status.AvailableReplicas, found.Status.AvailableReplicas) {
-			r.plus.Status.AvailableReplicas[app.Version] = found.Status.AvailableReplicas
-		}
+		r.plus.Status.AvailableReplicas[app.Version] = found.Status.AvailableReplicas
 	}
 
 	return nil

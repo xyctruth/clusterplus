@@ -98,6 +98,7 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	instance := found.DeepCopy()
+	instance.Status.Success = true
 
 	// 创建或更新操作
 	resources, err := r.getOwnResources(instance, log)
@@ -105,9 +106,6 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		log.Error(err, "getOwnResource error")
 		return ctrl.Result{}, err
 	}
-
-	instance.Status.Success = true
-	instance.GenerateStatusDesc()
 
 	// 判断各 resource 是否存在，不存在则创建，存在则判断spec是否有变化，有变化则更新
 	for _, ownResource := range resources {
@@ -124,6 +122,7 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 	}
 
+	instance.GenerateStatusDesc()
 	if !reflect.DeepEqual(instance.Status, found.Status) {
 		if err := r.Status().Update(context.Background(), instance); err != nil {
 			if apierrors.IsConflict(err) {
@@ -133,6 +132,10 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			r.Recorder.Event(instance, "Normal", "UpdateStatusError", fmt.Sprintf(" error : %s", err.Error()))
 			return ctrl.Result{}, err
 		}
+
+		fmt.Println(instance.Status)
+		fmt.Println(found.Status)
+		log.Info("Successfully Update Status")
 	}
 
 	log.Info("Successfully Reconciled")
