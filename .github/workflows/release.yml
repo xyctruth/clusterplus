@@ -8,7 +8,6 @@ on:
 jobs:
   docker_build_push:
     runs-on: ubuntu-latest
-    environment: kfpt-fat
     steps:
       - name: Install Go
         uses: actions/setup-go@v3
