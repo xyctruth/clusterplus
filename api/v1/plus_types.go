@@ -62,7 +62,7 @@ type PlusDesc struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Hosts",type="string",JSONPath=".spec.gateway.hosts",description="Hosts"
-// +kubebuilder:printcolumn:name="PrefixPath",type="string",JSONPath=".spec.gateway.prefixPath",description="Visit prefix path"
+// +kubebuilder:printcolumn:name="PrefixPath",type="string",JSONPath=".status.desc.prefixPath",description="Visit prefix path"
 // +kubebuilder:printcolumn:name="Images",type="string",JSONPath=".status.desc.images",description="The Docker Image"
 // +kubebuilder:printcolumn:name="Replicas",type="string",JSONPath=".status.desc.replicas",description="Replicas"
 // +kubebuilder:printcolumn:name="AvailableReplicas",type="string",JSONPath=".status.desc.availableReplicas",description="AvailableReplicas"
@@ -137,6 +137,9 @@ func (r *Plus) GenerateStatusDesc() {
 
 func (r *Plus) GeneratePrefixPath() string {
 	prefixPath := ""
+	if r.Spec.Gateway == nil {
+		return ""
+	}
 	if r.Spec.Gateway.PathPrefix == nil {
 		prefixPath = fmt.Sprintf("/%s/%s", r.GetNamespace(), r.GetName())
 		return prefixPath

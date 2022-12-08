@@ -21,7 +21,7 @@ spec:
       name: Hosts
       type: string
     - description: Visit prefix path
-      jsonPath: .spec.gateway.prefixPath
+      jsonPath: .status.desc.prefixPath
       name: PrefixPath
       type: string
     - description: The Docker Image
