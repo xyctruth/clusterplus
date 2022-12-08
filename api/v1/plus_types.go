@@ -141,7 +141,7 @@ func (r *Plus) GeneratePrefixPath() string {
 		return ""
 	}
 	if r.Spec.Gateway.PathPrefix == nil {
-		prefixPath = fmt.Sprintf("/%s/%s", r.GetNamespace(), r.GetName())
+		prefixPath = fmt.Sprintf("/%s", r.GetName())
 		return prefixPath
 	}
 
