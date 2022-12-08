@@ -162,7 +162,7 @@ func (r *VirtualService) generateGateway() []string {
 func (r *VirtualService) generatePrefixPath() string {
 	prefixPath := ""
 	if r.plus.Spec.Gateway.PathPrefix == nil {
-		prefixPath = fmt.Sprintf("/%s", r.plus.GetName())
+		prefixPath = fmt.Sprintf("/%s/%s", r.plus.GetNamespace(), r.plus.GetName())
 		return prefixPath
 	}
 

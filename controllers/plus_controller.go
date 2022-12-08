@@ -18,14 +18,13 @@ package controllers
 
 import (
 	plusappsv1 "clusterplus.io/clusterplus/api/v1"
-	own2 "clusterplus.io/clusterplus/api/v1/own"
+	ownv1 "clusterplus.io/clusterplus/api/v1/own"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
 	istioclientapiv1 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	appsv1 "k8s.io/api/apps/v1"
-	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -189,20 +188,17 @@ func (r *PlusReconciler) Finalizer(ctx context.Context, log logr.Logger, instanc
 // 根据Unit.Spec生成其所有的own resource
 func (r *PlusReconciler) getOwnResources(instance *plusappsv1.Plus, log logr.Logger) ([]IResource, error) {
 	var resources []IResource
-
-	resources = append(resources, own2.NewDeployment(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own2.NewService(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own2.NewDestinationRule(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own2.NewVirtualService(instance, r.Scheme, r.Client, log))
-	resources = append(resources, own2.NewAutoScaling(instance, r.Scheme, r.Client, log))
-
+	resources = append(resources, ownv1.NewDeployment(instance, r.Scheme, r.Client, log))
+	resources = append(resources, ownv1.NewService(instance, r.Scheme, r.Client, log))
+	resources = append(resources, ownv1.NewDestinationRule(instance, r.Scheme, r.Client, log))
+	resources = append(resources, ownv1.NewVirtualService(instance, r.Scheme, r.Client, log))
+	resources = append(resources, ownv1.NewAutoScaling(instance, r.Scheme, r.Client, log))
 	return resources, nil
 }
 
 func (r *PlusReconciler) PreDelete(instance *plusappsv1.Plus) error {
 	// 特别说明，own resource加上了ControllerReference之后，owner resource gc删除前，会先自动删除它的所有
 	// own resources，因此绑定ControllerReference后无需再特别处理删除own resource。
-
 	// 这里留空出来，是为了如果有自定义的pre delete逻辑的需要，可在这里实现。
 	return nil
 }
@@ -213,7 +209,8 @@ func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&plusappsv1.Plus{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
-		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
+		// Watch HPA 资源会导致频繁调和
+		//Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		Owns(&istioclientapiv1.VirtualService{}).
 		Owns(&istioclientapiv1.DestinationRule{}).
 		WithOptions(controller.Options{
