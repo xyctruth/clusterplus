@@ -52,7 +52,6 @@ type PlusStatus struct {
 }
 
 type PlusDesc struct {
-	AvailableReplicas string `json:"availableReplicas,omitempty"`
 	Replicas          string `json:"replicas,omitempty"`
 	Images            string `json:"images,omitempty"`
 	Weights           string `json:"weights,omitempty"`
@@ -63,10 +62,9 @@ type PlusDesc struct {
 //+kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Hosts",type="string",JSONPath=".spec.gateway.hosts",description="Hosts"
 // +kubebuilder:printcolumn:name="PrefixPath",type="string",JSONPath=".status.desc.prefixPath",description="Visit prefix path"
+// +kubebuilder:printcolumn:name="Weights",type="string",JSONPath=".status.desc.weights",description="Weights"
 // +kubebuilder:printcolumn:name="Images",type="string",JSONPath=".status.desc.images",description="The Docker Image"
 // +kubebuilder:printcolumn:name="Replicas",type="string",JSONPath=".status.desc.replicas",description="Replicas"
-// +kubebuilder:printcolumn:name="AvailableReplicas",type="string",JSONPath=".status.desc.availableReplicas",description="AvailableReplicas"
-// +kubebuilder:printcolumn:name="Weights",type="string",JSONPath=".status.desc.weights",description="Weights"
 // +kubebuilder:printcolumn:name="Success",type="boolean",JSONPath=".status.success",description="Success"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
@@ -116,8 +114,8 @@ func (r *Plus) GenerateStatusDesc() {
 	r.Status.Desc = PlusDesc{}
 	for _, v := range r.Spec.Apps {
 		key := v.Version
-		r.Status.Desc.AvailableReplicas = r.Status.Desc.AvailableReplicas + fmt.Sprintf("%s:%d ", v.Version, r.Status.AvailableReplicas[key])
-		r.Status.Desc.Replicas = r.Status.Desc.Replicas + fmt.Sprintf("%s:%d-%d ", v.Version, v.MinReplicas, v.MaxReplicas)
+		r.Status.Desc.Replicas = r.Status.Desc.Replicas +
+			fmt.Sprintf("%s:%d-%d(%d) ", v.Version, v.MinReplicas, v.MaxReplicas,r.Status.AvailableReplicas[key])
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
 			r.Status.Desc.Images = r.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
@@ -128,10 +126,16 @@ func (r *Plus) GenerateStatusDesc() {
 			}
 		}
 	}
-	r.Status.Desc.AvailableReplicas = fmt.Sprintf("[%s]", r.Status.Desc.AvailableReplicas)
-	r.Status.Desc.Replicas = fmt.Sprintf("[%s]", r.Status.Desc.Replicas)
-	r.Status.Desc.Images = fmt.Sprintf("[%s]", r.Status.Desc.Images)
-	r.Status.Desc.Weights = fmt.Sprintf("[%s]", r.Status.Desc.Weights)
+	if len(r.Status.Desc.Replicas)>0{
+		r.Status.Desc.Replicas = strings.TrimSuffix(r.Status.Desc.Replicas," ")
+	}
+	if len(r.Status.Desc.Images)>0{
+		r.Status.Desc.Images = strings.TrimSuffix(r.Status.Desc.Images," ")
+	}
+	if len(r.Status.Desc.Weights)>0{
+		r.Status.Desc.Weights = strings.TrimSuffix(r.Status.Desc.Weights," ")
+	}
+
 	r.Status.Desc.PrefixPath = r.GeneratePrefixPath()
 }
 

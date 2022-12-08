@@ -32,10 +32,6 @@ spec:
       jsonPath: .status.desc.replicas
       name: Replicas
       type: string
-    - description: AvailableReplicas
-      jsonPath: .status.desc.availableReplicas
-      name: AvailableReplicas
-      type: string
     - description: Weights
       jsonPath: .status.desc.weights
       name: Weights
@@ -362,8 +358,6 @@ spec:
                 type: object
               desc:
                 properties:
-                  availableReplicas:
-                    type: string
                   images:
                     type: string
                   prefixPath:
