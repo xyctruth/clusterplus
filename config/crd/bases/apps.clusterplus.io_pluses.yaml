@@ -24,6 +24,10 @@ spec:
       jsonPath: .status.desc.prefixPath
       name: PrefixPath
       type: string
+    - description: Weights
+      jsonPath: .status.desc.weights
+      name: Weights
+      type: string
     - description: The Docker Image
       jsonPath: .status.desc.images
       name: Images
@@ -31,10 +35,6 @@ spec:
     - description: Replicas
       jsonPath: .status.desc.replicas
       name: Replicas
-      type: string
-    - description: Weights
-      jsonPath: .status.desc.weights
-      name: Weights
       type: string
     - description: Success
       jsonPath: .status.success
