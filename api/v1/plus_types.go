@@ -56,11 +56,13 @@ type PlusDesc struct {
 	Replicas          string `json:"replicas,omitempty"`
 	Images            string `json:"images,omitempty"`
 	Weights           string `json:"weights,omitempty"`
+	PrefixPath        string `json:"prefixPath,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Hosts",type="string",JSONPath=".spec.gateway.hosts",description="Hosts"
+// +kubebuilder:printcolumn:name="PrefixPath",type="string",JSONPath=".spec.gateway.prefixPath",description="Visit prefix path"
 // +kubebuilder:printcolumn:name="Images",type="string",JSONPath=".status.desc.images",description="The Docker Image"
 // +kubebuilder:printcolumn:name="Replicas",type="string",JSONPath=".status.desc.replicas",description="Replicas"
 // +kubebuilder:printcolumn:name="AvailableReplicas",type="string",JSONPath=".status.desc.availableReplicas",description="AvailableReplicas"
@@ -130,6 +132,25 @@ func (r *Plus) GenerateStatusDesc() {
 	r.Status.Desc.Replicas = fmt.Sprintf("[%s]", r.Status.Desc.Replicas)
 	r.Status.Desc.Images = fmt.Sprintf("[%s]", r.Status.Desc.Images)
 	r.Status.Desc.Weights = fmt.Sprintf("[%s]", r.Status.Desc.Weights)
+	r.Status.Desc.PrefixPath = r.GeneratePrefixPath()
+}
+
+func (r *Plus) GeneratePrefixPath() string {
+	prefixPath := ""
+	if r.Spec.Gateway.PathPrefix == nil {
+		prefixPath = fmt.Sprintf("/%s/%s", r.GetNamespace(), r.GetName())
+		return prefixPath
+	}
+
+	if *r.Spec.Gateway.PathPrefix == "" {
+		return ""
+	}
+
+	if strings.HasPrefix(*r.Spec.Gateway.PathPrefix, "/") {
+		return *r.Spec.Gateway.PathPrefix
+	} else {
+		return fmt.Sprintf("/%s", *r.Spec.Gateway.PathPrefix)
+	}
 }
 
 func (r *Plus) Validate() error {

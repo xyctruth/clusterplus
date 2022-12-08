@@ -1,21 +1,19 @@
 package own
 
 import (
+	v1 "clusterplus.io/clusterplus/api/v1"
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"reflect"
-	"strings"
-
-	v1 "clusterplus.io/clusterplus/api/v1"
-	"github.com/go-logr/logr"
 	istioapiv1 "istio.io/api/networking/v1alpha3"
 	istioclientapiv1 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -160,21 +158,7 @@ func (r *VirtualService) generateGateway() []string {
 }
 
 func (r *VirtualService) generatePrefixPath() string {
-	prefixPath := ""
-	if r.plus.Spec.Gateway.PathPrefix == nil {
-		prefixPath = fmt.Sprintf("/%s/%s", r.plus.GetNamespace(), r.plus.GetName())
-		return prefixPath
-	}
-
-	if *r.plus.Spec.Gateway.PathPrefix == "" {
-		return ""
-	}
-
-	if strings.HasPrefix(*r.plus.Spec.Gateway.PathPrefix, "/") {
-		return *r.plus.Spec.Gateway.PathPrefix
-	} else {
-		return fmt.Sprintf("/%s", *r.plus.Spec.Gateway.PathPrefix)
-	}
+	return r.plus.GeneratePrefixPath()
 }
 
 func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchRequest {

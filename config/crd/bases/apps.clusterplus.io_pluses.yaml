@@ -20,6 +20,10 @@ spec:
       jsonPath: .spec.gateway.hosts
       name: Hosts
       type: string
+    - description: Visit prefix path
+      jsonPath: .spec.gateway.prefixPath
+      name: PrefixPath
+      type: string
     - description: The Docker Image
       jsonPath: .status.desc.images
       name: Images
@@ -361,6 +365,8 @@ spec:
                   availableReplicas:
                     type: string
                   images:
+                    type: string
+                  prefixPath:
                     type: string
                   replicas:
                     type: string
