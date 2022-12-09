@@ -21,6 +21,7 @@ type PlusApp struct {
 	RestartMark      string                      `json:"restartMark,omitempty"`
 	ReadinessProbe   *PlusAppProbe               `json:"readinessProbe,omitempty"`
 	LivenessProbe    *PlusAppProbe               `json:"livenessProbe,omitempty"`
+	HostAliases      []corev1.HostAlias          `json:"hostAliases,omitempty"`
 }
 
 type PlusAppProbe struct {

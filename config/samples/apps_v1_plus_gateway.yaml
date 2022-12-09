@@ -55,6 +55,10 @@ spec:
         httpPath: /
       livenessProbe:
         httpPath: /
+      hostAliases:
+        - ip: 1.1.1.1
+          hostnames:
+            - "123"
     - version: green
       env:
         - name: VERSION

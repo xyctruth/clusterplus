@@ -52,10 +52,10 @@ type PlusStatus struct {
 }
 
 type PlusDesc struct {
-	Replicas          string `json:"replicas,omitempty"`
-	Images            string `json:"images,omitempty"`
-	Weights           string `json:"weights,omitempty"`
-	PrefixPath        string `json:"prefixPath,omitempty"`
+	Replicas   string `json:"replicas,omitempty"`
+	Images     string `json:"images,omitempty"`
+	Weights    string `json:"weights,omitempty"`
+	PrefixPath string `json:"prefixPath,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -115,7 +115,7 @@ func (r *Plus) GenerateStatusDesc() {
 	for _, v := range r.Spec.Apps {
 		key := v.Version
 		r.Status.Desc.Replicas = r.Status.Desc.Replicas +
-			fmt.Sprintf("%s:%d-%d(%d) ", v.Version, v.MinReplicas, v.MaxReplicas,r.Status.AvailableReplicas[key])
+			fmt.Sprintf("%s:%d-%d(%d) ", v.Version, v.MinReplicas, v.MaxReplicas, r.Status.AvailableReplicas[key])
 		imagesPath := strings.Split(v.Image, ":")
 		if imagesPath != nil && len(imagesPath) > 0 {
 			r.Status.Desc.Images = r.Status.Desc.Images + fmt.Sprintf("%s:%s ", v.Version, imagesPath[len(imagesPath)-1])
@@ -126,14 +126,14 @@ func (r *Plus) GenerateStatusDesc() {
 			}
 		}
 	}
-	if len(r.Status.Desc.Replicas)>0{
-		r.Status.Desc.Replicas = strings.TrimSuffix(r.Status.Desc.Replicas," ")
+	if len(r.Status.Desc.Replicas) > 0 {
+		r.Status.Desc.Replicas = strings.TrimSuffix(r.Status.Desc.Replicas, " ")
 	}
-	if len(r.Status.Desc.Images)>0{
-		r.Status.Desc.Images = strings.TrimSuffix(r.Status.Desc.Images," ")
+	if len(r.Status.Desc.Images) > 0 {
+		r.Status.Desc.Images = strings.TrimSuffix(r.Status.Desc.Images, " ")
 	}
-	if len(r.Status.Desc.Weights)>0{
-		r.Status.Desc.Weights = strings.TrimSuffix(r.Status.Desc.Weights," ")
+	if len(r.Status.Desc.Weights) > 0 {
+		r.Status.Desc.Weights = strings.TrimSuffix(r.Status.Desc.Weights, " ")
 	}
 
 	r.Status.Desc.PrefixPath = r.GeneratePrefixPath()
