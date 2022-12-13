@@ -60,7 +60,7 @@ func (r *Deployment) Apply() error {
 				return err
 			}
 		} else {
-			if *obj.Spec.Replicas >= app.MinReplicas && *obj.Spec.Replicas <= app.MaxReplicas {
+			if *found.Spec.Replicas >= app.MinReplicas && *found.Spec.Replicas <= app.MaxReplicas {
 				obj.Spec.Replicas = found.Spec.Replicas
 			}
 
