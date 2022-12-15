@@ -109,7 +109,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	progressDeadlineSeconds := int32(600)
 	revisionHistoryLimit := int32(10)
 
-	app.Env = append(app.Env, corev1.EnvVar{Name: "LOG_PATH", Value: "/app/logs/*/*.txt"})
+	app.Env = append(app.Env, corev1.EnvVar{Name: r.plus.GetName() + "-logs", Value: "/app/logs/*/*.txt"})
 
 	// 构建k8s Deployment
 	deployment := &appsv1.Deployment{
