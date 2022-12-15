@@ -109,7 +109,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	progressDeadlineSeconds := int32(600)
 	revisionHistoryLimit := int32(10)
 
-	app.Env = append(app.Env, corev1.EnvVar{Name: r.plus.GetName() + "-logs", Value: "/app/logs/*/*.txt"})
+	logsKey := r.plus.GetName() + "-logs"
 
 	// 构建k8s Deployment
 	deployment := &appsv1.Deployment{
@@ -161,7 +161,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 								MountPath: "/etc/localtime",
 							},
 							{
-								Name:      "logs",
+								Name:      logsKey,
 								MountPath: "/app/logs/",
 							},
 						},
@@ -194,7 +194,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 							},
 						},
 					}, {
-						Name: "logs",
+						Name: logsKey,
 						VolumeSource: corev1.VolumeSource{
 							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
