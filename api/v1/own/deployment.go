@@ -108,6 +108,9 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	terminationGracePeriodSeconds := int64(30)
 	progressDeadlineSeconds := int32(600)
 	revisionHistoryLimit := int32(10)
+
+	app.Env = append(app.Env, corev1.EnvVar{Name: "LOG_PATH", Value: "/app/logs/*/*.txt"})
+
 	// 构建k8s Deployment
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -157,6 +160,10 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 								Name:      "tz-config",
 								MountPath: "/etc/localtime",
 							},
+							{
+								Name:      "logs",
+								MountPath: "/app/logs/",
+							},
 						},
 					}},
 					//Affinity: &corev1.Affinity{
@@ -185,6 +192,11 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 								Path: "/usr/share/zoneinfo/Asia/Shanghai",
 								Type: &hostPathType,
 							},
+						},
+					}, {
+						Name: "logs",
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					}},
 				},
