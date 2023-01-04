@@ -1,0 +1,4 @@
+reconcile:
+  enable: false
+  details:
+    kfpt-qq/paas-qq-merchant-consumersvc: true

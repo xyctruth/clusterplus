@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
+	"github.com/jinzhu/configor"
 	istioclientapiv1 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"time"
 )
 
 // PlusReconciler reconciles a Plus object
@@ -41,6 +43,7 @@ type PlusReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
+	config   Config
 }
 
 //+kubebuilder:rbac:groups=apps.clusterplus.io,resources=pluses,verbs=get;list;watch;create;update;patch;delete
@@ -59,10 +62,11 @@ type PlusReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
-	//if !plusappsv1.CONFIG.FilterRequest(req.Version) {
-	//	log.WithValues("config", plusappsv1.CONFIG).WithValues("req", req.Version).Info("Reconcile cancel,this req filter is false ")
-	//	return ctrl.Result{}, nil
-	//}
+
+	if !r.FilterRequest(req.NamespacedName.String()) {
+		log.WithValues("config", r.config).Info("Reconcile cancel,The change request is filtered ")
+		return ctrl.Result{}, nil
+	}
 
 	// panic recovery
 	defer func() {
@@ -205,6 +209,18 @@ func (r *PlusReconciler) PreDelete(instance *plusappsv1.Plus) error {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	err := configor.New(&configor.Config{
+		AutoReload:         true,
+		AutoReloadInterval: time.Minute,
+		Verbose:            true,
+		AutoReloadCallback: func(config interface{}) {
+			ctrl.Log.WithValues("config", config).Info("config changed")
+		}}).Load(&r.config, "./config/config.yaml")
+
+	if err != nil {
+		return err
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&plusappsv1.Plus{}).
 		Owns(&appsv1.Deployment{}).
@@ -218,4 +234,12 @@ func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}).
 		//WithEventFilter(&EventFilter{}).
 		Complete(r)
+}
+
+func (r *PlusReconciler) FilterRequest(name string) bool {
+	if v, ok := r.config.ReconcileFilter.Details[name]; ok {
+		return v
+	}
+
+	return r.config.ReconcileFilter.Enable
 }

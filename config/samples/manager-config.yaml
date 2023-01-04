@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: manager-config
+  namespace: clusterplus-system
+data:
+  config.yaml: |-
+    reconcile:
+      enable: true
+      details:
+        asd/out-admin-gateway: true
