@@ -91,6 +91,10 @@ func (r *Plus) GetAppName(app *PlusApp) string {
 	return r.Name + "-" + app.Version
 }
 
+func (r *Plus) GetAppImage(app *PlusApp) string {
+	return strings.ReplaceAll(app.Image, "_"+app.Version, "")
+}
+
 func (r *Plus) GenerateLabels() map[string]string {
 	labels := make(map[string]string)
 	for k, v := range r.Labels {

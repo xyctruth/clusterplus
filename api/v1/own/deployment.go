@@ -144,7 +144,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 					SchedulerName:                 "default-scheduler",
 					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
 					Containers: []corev1.Container{{
-						Image:                    app.Image,
+						Image:                    r.plus.GetAppImage(app),
 						ImagePullPolicy:          corev1.PullAlways,
 						Name:                     r.plus.GetAppName(app),
 						Ports:                    r.buildPorts(app),
