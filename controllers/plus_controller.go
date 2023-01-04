@@ -240,6 +240,5 @@ func (r *PlusReconciler) FilterRequest(name string) bool {
 	if v, ok := r.config.ReconcileFilter.Details[name]; ok {
 		return v
 	}
-
 	return r.config.ReconcileFilter.Enable
 }

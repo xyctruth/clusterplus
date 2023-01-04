@@ -17,7 +17,7 @@ spec:
           name: cert
           readOnly: true
         - name: config
-          mountPath: /
+          mountPath: /config
           readOnly: false
       volumes:
       - name: cert
