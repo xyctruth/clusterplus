@@ -286,7 +286,7 @@ func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Prob
 	if probe.HttpPath != "" {
 		p.ProbeHandler = corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
+				Path: probe.HttpPath,
 				Port: intstr.IntOrString{
 					IntVal: port,
 				},

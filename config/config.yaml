@@ -1,5 +1,6 @@
 reconcile:
   enable: false
   details:
-    kfpt-qq: true
-    kfpt-qq/paas-qq-merchant-consumersvc: true
+    kfpt-qq: false
+    kfpt-qq/paas-qq-merchant-consumersvc: false
+    test-xyc/gateway: true

@@ -9,3 +9,4 @@ data:
       enable: true
       details:
         asd/out-admin-gateway: true
+        test-xyc/gateway: false

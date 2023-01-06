@@ -64,7 +64,7 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
 
 	if !r.FilterRequest(req) {
-		log.WithValues("config", r.config).Info("Reconcile cancel,The change request is filtered ")
+		log.Info("Reconcile cancel,The change request is filtered ")
 		return ctrl.Result{}, nil
 	}
 
