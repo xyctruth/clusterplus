@@ -33,14 +33,13 @@ type PlusSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Plus. Edit plus_types.go to remove/update
+	// Gateway 描述需要提供域名对外提供访问的程序
 	Gateway *PlusGateway `json:"gateway,omitempty"`
-	Policy  *PlusPolicy  `json:"policy,omitempty"`
-	Apps    []*PlusApp   `json:"apps,omitempty"`
-	Type    PlusType     `json:"type,omitempty"`
+	// Policy 描述网络策略
+	Policy *PlusPolicy `json:"policy,omitempty"`
+	// Apps 描述具体部署的程序，可以有多个版本
+	Apps []*PlusApp `json:"apps,omitempty"`
 }
-
-type PlusType string
 
 // PlusStatus defines the observed state of Plus
 type PlusStatus struct {

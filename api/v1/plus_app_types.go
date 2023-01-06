@@ -9,6 +9,7 @@ import (
 )
 
 type PlusApp struct {
+	// 一个程序多个版本，（用于蓝绿版本,灰度版本等）
 	Version          string                      `json:"version,omitempty"`
 	Image            string                      `json:"image,omitempty"`
 	ImagePullSecrets string                      `json:"imagePullSecrets,omitempty"`
@@ -25,7 +26,9 @@ type PlusApp struct {
 }
 
 type PlusAppProbe struct {
-	HttpPath string `json:"httpPath,omitempty"`
+	HttpPath            string `json:"httpPath,omitempty"`
+	TimeoutSeconds      int32  `json:"timeoutSeconds,omitempty"`
+	InitialDelaySeconds int32  `json:"initialDelaySeconds,omitempty"`
 }
 
 func (r *PlusApp) Validate(fldPath *field.Path) error {

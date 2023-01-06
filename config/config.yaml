@@ -1,4 +1,5 @@
 reconcile:
   enable: false
   details:
+    kfpt-qq: true
     kfpt-qq/paas-qq-merchant-consumersvc: true

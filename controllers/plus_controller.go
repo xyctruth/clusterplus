@@ -63,7 +63,7 @@ type PlusReconciler struct {
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
 
-	if !r.FilterRequest(req.NamespacedName.String()) {
+	if !r.FilterRequest(req) {
 		log.WithValues("config", r.config).Info("Reconcile cancel,The change request is filtered ")
 		return ctrl.Result{}, nil
 	}
@@ -236,8 +236,13 @@ func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *PlusReconciler) FilterRequest(name string) bool {
-	if v, ok := r.config.ReconcileFilter.Details[name]; ok {
+func (r *PlusReconciler) FilterRequest(req ctrl.Request) bool {
+
+	if v, ok := r.config.ReconcileFilter.Details[req.NamespacedName.String()]; ok {
+		return v
+	}
+
+	if v, ok := r.config.ReconcileFilter.Details[req.Namespace]; ok {
 		return v
 	}
 	return r.config.ReconcileFilter.Enable

@@ -53,6 +53,7 @@ spec:
           memory: 500Mi
       readinessProbe:
         httpPath: /
+        initialDelaySeconds: 10
       livenessProbe:
         httpPath: /
       hostAliases:

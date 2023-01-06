@@ -268,11 +268,19 @@ func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Prob
 		return nil
 	}
 	p := &corev1.Probe{
-		InitialDelaySeconds: 1,
-		PeriodSeconds:       3,
+		InitialDelaySeconds: 10,
+		PeriodSeconds:       10,
 		SuccessThreshold:    1,
 		FailureThreshold:    3,
-		TimeoutSeconds:      5,
+		TimeoutSeconds:      3,
+	}
+
+	if probe.InitialDelaySeconds > 0 {
+		p.InitialDelaySeconds = probe.InitialDelaySeconds
+	}
+
+	if probe.TimeoutSeconds > 0 {
+		p.TimeoutSeconds = probe.TimeoutSeconds
 	}
 
 	if probe.HttpPath != "" {

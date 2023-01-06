@@ -64,6 +64,7 @@ spec:
             description: PlusSpec defines the desired state of Plus
             properties:
               apps:
+                description: Apps 描述具体部署的程序，可以有多个版本
                 items:
                   properties:
                     env:
@@ -206,6 +207,12 @@ spec:
                       properties:
                         httpPath:
                           type: string
+                        initialDelaySeconds:
+                          format: int32
+                          type: integer
+                        timeoutSeconds:
+                          format: int32
+                          type: integer
                       type: object
                     maxReplicas:
                       format: int32
@@ -222,6 +229,12 @@ spec:
                       properties:
                         httpPath:
                           type: string
+                        initialDelaySeconds:
+                          format: int32
+                          type: integer
+                        timeoutSeconds:
+                          format: int32
+                          type: integer
                       type: object
                     resources:
                       description: ResourceRequirements describes the compute resource
@@ -254,12 +267,12 @@ spec:
                     restartMark:
                       type: string
                     version:
+                      description: 一个程序多个版本，（用于蓝绿版本,灰度版本等）
                       type: string
                   type: object
                 type: array
               gateway:
-                description: Foo is an example field of Plus. Edit plus_types.go to
-                  remove/update
+                description: Gateway 描述需要提供域名对外提供访问的程序
                 properties:
                   cors:
                     properties:
@@ -304,6 +317,7 @@ spec:
                     type: object
                 type: object
               policy:
+                description: Policy 描述网络策略
                 properties:
                   fault:
                     properties:
@@ -357,8 +371,6 @@ spec:
                   timeout:
                     type: string
                 type: object
-              type:
-                type: string
             type: object
           status:
             description: PlusStatus defines the observed state of Plus
