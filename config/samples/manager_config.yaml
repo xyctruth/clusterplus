@@ -8,5 +8,4 @@ data:
     reconcile:
       enable: true
       details:
-        asd/out-admin-gateway: true
-        test-xyc/gateway: false
+        test-xyc: false
