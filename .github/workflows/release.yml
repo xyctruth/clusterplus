@@ -23,15 +23,27 @@ jobs:
           fi
           echo ::set-output name=VERSION::${VERSION}
 
+#      - name: Login docker.io
+#        uses: docker/login-action@v2
+#        with:
+#          registry: docker.io
+#          username: xyctruth
+#          password: ${{ secrets.DOCKER_TOKEN }}
+#
+#      - name: Build Push Docker
+#        id: docker_build_push
+#        run: |
+#          make docker-build docker-push  IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
+
       - name: Login docker.io
         uses: docker/login-action@v2
         with:
-          registry: docker.io
-          username: xyctruth
-          password: ${{ secrets.DOCKER_TOKEN }}
+          registry: registry.cn-shanghai.aliyuncs.com
+          username: zxc5200216112
+          password: ${{ secrets.DOCKER_TOKEN_ALI }}
 
       - name: Build Push Docker
         id: docker_build_push
         run: |
-          make docker-build docker-push  IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          make docker-build docker-push  IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}
 

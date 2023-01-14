@@ -14,7 +14,7 @@ on:
 
 jobs:
 
-  deployment:
+  deployment-fat:
     runs-on: ubuntu-latest
     environment: kfpt-fat
     steps:
@@ -43,4 +43,36 @@ jobs:
           export KUBECONFIG=/tmp/config
           make manifests
           make install
-          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          make deploy IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}
+
+
+  deployment-prod:
+    runs-on: ubuntu-latest
+    environment: kfpt-prod
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - name: Get the version
+        id: get_version
+        run: |
+          echo $GITHUB_EVENT_NAME
+
+          if [[ $GITHUB_EVENT_NAME == "workflow_dispatch" ]]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+
+          if [[ $GITHUB_EVENT_NAME == "release" ]]; then
+            VERSION=${{ github.event.release.tag_name }}
+          fi
+          echo ::set-output name=VERSION::${VERSION}
+      - uses: actions/checkout@v3
+      - name: Deploy
+        id: deploy
+        run: |
+          echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 -d > /tmp/config
+          export KUBECONFIG=/tmp/config
+          make manifests
+          make install
+          make deploy IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}

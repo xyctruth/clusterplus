@@ -5,11 +5,11 @@ metadata:
 spec:
   gateway:
     hosts:
-      - api-fat.tanjingmama.cn
+      - api.tanjingpaas.com
     weights: # 默认路由权重
       blue: 100
       green: 0
-    #pathPrefix: ""
+    pathPrefix: ""
     route: # 指定路由进入环境
       blue:
         headersMatch:
@@ -51,10 +51,10 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
-      readinessProbe:
-        httpPath: /
-      livenessProbe:
-        httpPath: /
+#      readinessProbe:
+#        httpPath: /
+#      livenessProbe:
+#        httpPath: /
       hostAliases:
         - ip: 1.1.1.1
           hostnames:
