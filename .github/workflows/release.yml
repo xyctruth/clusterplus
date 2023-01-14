@@ -45,5 +45,5 @@ jobs:
       - name: Build Push Docker
         id: docker_build_push
         run: |
-          make docker-build docker-push  IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          make docker-build docker-push  IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
 

@@ -43,7 +43,7 @@ jobs:
           export KUBECONFIG=/tmp/config
           make manifests
           make install
-          make deploy IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
 
 
   deployment-prod:
@@ -75,4 +75,4 @@ jobs:
           export KUBECONFIG=/tmp/config
           make manifests
           make install
-          make deploy IMG=registry.cn-shanghai.aliyuncs.com/kftp/clusterplus:${{ steps.get_version.outputs.VERSION }}
+          make deploy IMG=docker.io/xyctruth/clusterplus:${{ steps.get_version.outputs.VERSION }}
