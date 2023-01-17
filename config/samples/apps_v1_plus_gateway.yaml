@@ -6,6 +6,9 @@ spec:
   gateway:
     hosts:
       - api.tanjingpaas.com
+      - api-dev.tanjingmama.cn
+      - 114.55.25.242
+      - test.tanjingpaas.com
     weights: # 默认路由权重
       blue: 100
       green: 0
@@ -38,7 +41,7 @@ spec:
           value: fat
         - name: ENV
           value: fat
-      image: xyctruth/plus-test:v0.0.10
+      image: xyctruth/plus-test:v0.0.11
       imagePullSecrets: imageSecretName
       minReplicas: 1
       maxReplicas: 10
@@ -63,7 +66,7 @@ spec:
       env:
         - name: VERSION
           value: green_version
-      image: xyctruth/plus-test:v0.0.10
+      image: xyctruth/plus-test:v0.0.11
       minReplicas: -1
       maxReplicas: -1
       port: 8080

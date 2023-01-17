@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	_ "go.uber.org/automaxprocs"
@@ -22,8 +23,15 @@ func init() {
 
 func main() {
 	router := gin.Default()
-
 	router.GET("/", func(c *gin.Context) {
+		h := c.Request.Header
+
+		aa := c.GetHeader("abcdef")
+		fmt.Println(aa)
+
+		for s, ss := range h {
+			fmt.Println(s, ":", ss)
+		}
 		c.String(http.StatusOK, "当前服务版本是 %s", version)
 	})
 
