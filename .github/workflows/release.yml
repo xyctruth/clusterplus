@@ -38,9 +38,9 @@ jobs:
       - name: Login docker.io
         uses: docker/login-action@v2
         with:
-          registry: registry.cn-shanghai.aliyuncs.com
-          username: zxc5200216112
-          password: ${{ secrets.DOCKER_TOKEN_ALI }}
+          registry: docker.io
+          username: xyctruth
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build Push Docker
         id: docker_build_push
