@@ -8,5 +8,5 @@ data:
     reconcile:
       enable: true
       details:
-        test-xyc: false
+        test-xyc: true
         

@@ -44,6 +44,7 @@ type PlusReconciler struct {
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
 	config   ReconcileConfig
+	log      logr.Logger
 }
 
 //+kubebuilder:rbac:groups=apps.clusterplus.io,resources=pluses,verbs=get;list;watch;create;update;patch;delete
@@ -61,8 +62,7 @@ type PlusReconciler struct {
 // For more details, check ReconcileConfig and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
-
+	log := r.log.WithValues("plus", req.NamespacedName)
 	if !r.FilterRequest(req) {
 		log.Info("ReconcileConfig cancel,The change request is filtered ")
 		return ctrl.Result{}, nil
@@ -209,7 +209,6 @@ func (r *PlusReconciler) PreDelete(instance *plusappsv1.Plus) error {
 
 func (r *PlusReconciler) LoadConfig() error {
 	var err error
-
 	conf := viper.New()
 	conf.SetConfigFile("./config/config.yaml")
 	conf.SetConfigType("yaml")
@@ -221,13 +220,14 @@ func (r *PlusReconciler) LoadConfig() error {
 	if err = conf.UnmarshalKey("reconcile", &r.config); err != nil {
 		return fmt.Errorf("fatal error config CollectorConfig: %w", err)
 	}
+	r.log.WithValues("Config", r.config).Info("Config changed")
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
 		if err = conf.UnmarshalKey("reconcile", &r.config); err != nil {
-			ctrl.Log.WithValues("config", r.config).Error(err, "config load error")
+			r.log.WithValues("config", r.config).Error(err, "config load error")
 			return
 		}
-		ctrl.Log.WithValues("config", r.config).Info("config changed")
+		r.log.WithValues("Config", r.config).Info("Config changed")
 	})
 
 	conf.WatchConfig()
@@ -237,6 +237,8 @@ func (r *PlusReconciler) LoadConfig() error {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	r.log = ctrl.Log.WithName("controllers").WithName("Plus")
+
 	err := r.LoadConfig()
 	if err != nil {
 		return err
