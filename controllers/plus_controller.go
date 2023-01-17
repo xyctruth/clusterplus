@@ -22,8 +22,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/fsnotify/fsnotify"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/configor"
+	"github.com/spf13/viper"
 	istioclientapiv1 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -35,7 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
 )
 
 // PlusReconciler reconciles a Plus object
@@ -43,7 +43,7 @@ type PlusReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
-	config   Config
+	config   ReconcileConfig
 }
 
 //+kubebuilder:rbac:groups=apps.clusterplus.io,resources=pluses,verbs=get;list;watch;create;update;patch;delete
@@ -53,18 +53,18 @@ type PlusReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
+// TODO(user): Modify the ReconcileConfig function to compare the state specified by
 // the Plus object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
-// For more details, check Reconcile and its Result here:
+// For more details, check ReconcileConfig and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrl.Log.WithName("controllers").WithName("Plus").WithValues("plus", req.NamespacedName)
 
 	if !r.FilterRequest(req) {
-		log.Info("Reconcile cancel,The change request is filtered ")
+		log.Info("ReconcileConfig cancel,The change request is filtered ")
 		return ctrl.Result{}, nil
 	}
 
@@ -73,9 +73,9 @@ func (r *PlusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if rec := recover(); rec != nil {
 			switch x := rec.(type) {
 			case error:
-				log.Error(x, "Reconcile error")
+				log.Error(x, "ReconcileConfig error")
 			case string:
-				log.Error(errors.New(x), "Reconcile error")
+				log.Error(errors.New(x), "ReconcileConfig error")
 			}
 		}
 	}()
@@ -207,16 +207,37 @@ func (r *PlusReconciler) PreDelete(instance *plusappsv1.Plus) error {
 	return nil
 }
 
+func (r *PlusReconciler) LoadConfig() error {
+	var err error
+
+	conf := viper.New()
+	conf.SetConfigFile("./config/config.yaml")
+	conf.SetConfigType("yaml")
+
+	if err = conf.ReadInConfig(); err != nil {
+		return fmt.Errorf("fatal error config file: %w", err)
+	}
+
+	if err = conf.UnmarshalKey("reconcile", &r.config); err != nil {
+		return fmt.Errorf("fatal error config CollectorConfig: %w", err)
+	}
+
+	conf.OnConfigChange(func(in fsnotify.Event) {
+		if err = conf.UnmarshalKey("reconcile", &r.config); err != nil {
+			ctrl.Log.WithValues("config", r.config).Error(err, "config load error")
+			return
+		}
+		ctrl.Log.WithValues("config", r.config).Info("config changed")
+	})
+
+	conf.WatchConfig()
+
+	return nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := configor.New(&configor.Config{
-		AutoReload:         true,
-		AutoReloadInterval: time.Minute,
-		Verbose:            true,
-		AutoReloadCallback: func(config interface{}) {
-			ctrl.Log.WithValues("config", config).Info("config changed")
-		}}).Load(&r.config, "./config/config.yaml")
-
+	err := r.LoadConfig()
 	if err != nil {
 		return err
 	}
@@ -238,12 +259,12 @@ func (r *PlusReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *PlusReconciler) FilterRequest(req ctrl.Request) bool {
 
-	if v, ok := r.config.ReconcileFilter.Details[req.NamespacedName.String()]; ok {
+	if v, ok := r.config.Details[req.NamespacedName.String()]; ok {
 		return v
 	}
 
-	if v, ok := r.config.ReconcileFilter.Details[req.Namespace]; ok {
+	if v, ok := r.config.Details[req.Namespace]; ok {
 		return v
 	}
-	return r.config.ReconcileFilter.Enable
+	return r.config.Enable
 }
