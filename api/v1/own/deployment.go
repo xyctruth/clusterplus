@@ -300,5 +300,8 @@ func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Prob
 func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 	m := make(map[string]string)
 	m["apps.clusterplus.io/restart-mark"] = app.RestartMark
+	for k, v := range app.Annotations {
+		m[k] = v
+	}
 	return m
 }

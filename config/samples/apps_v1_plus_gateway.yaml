@@ -34,6 +34,10 @@ spec:
       interval: 10s
   apps:
     - version: blue
+      annotations:
+        koordinator.sh/cpuBurst: '{"policy": "auto"}'
+        koordinator.sh/cpuBurst1: '{"policy": "auto"}'
+        koordinator.sh/cpuBurst2: '{"policy": "auto"}'
       env:
         - name: VERSION
           value: blue_version
