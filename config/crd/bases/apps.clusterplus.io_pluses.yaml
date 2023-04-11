@@ -67,11 +67,6 @@ spec:
                 description: Apps 描述具体部署的程序，可以有多个版本
                 items:
                   properties:
-                    annotations:
-                      additionalProperties:
-                        type: string
-                      description: 一个程序多个版本，（用于蓝绿版本,灰度版本等）
-                      type: object
                     env:
                       items:
                         description: EnvVar represents an environment variable present
@@ -271,6 +266,15 @@ spec:
                       type: object
                     restartMark:
                       type: string
+                    templateAnnotations:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    templateLabels:
+                      additionalProperties:
+                        type: string
+                      description: 一个程序多个版本，（用于蓝绿版本,灰度版本等）
+                      type: object
                     version:
                       type: string
                   type: object
