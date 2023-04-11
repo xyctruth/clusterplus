@@ -1,8 +1,10 @@
 package own
 
 import (
-	v1 "clusterplus.io/clusterplus/api/v1"
 	"context"
+	"reflect"
+
+	v1 "clusterplus.io/clusterplus/api/v1"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -11,7 +13,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -129,7 +130,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 			Strategy: r.buildStrategy(),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      r.plus.GenerateAppLabels(app),
+					Labels:      r.plus.GenerateAppTemplateLabels(app),
 					Annotations: r.buildAnnotations(app),
 				},
 				Spec: corev1.PodSpec{
@@ -300,7 +301,7 @@ func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Prob
 func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 	m := make(map[string]string)
 	m["apps.clusterplus.io/restart-mark"] = app.RestartMark
-	for k, v := range app.Annotations {
+	for k, v := range app.TemplateAnnotations {
 		m[k] = v
 	}
 	return m

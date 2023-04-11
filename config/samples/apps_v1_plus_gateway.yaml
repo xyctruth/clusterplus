@@ -34,7 +34,9 @@ spec:
       interval: 10s
   apps:
     - version: blue
-      annotations:
+      templateLabels:
+        aaa: bbb
+      templateAnnotations:
         koordinator.sh/cpuBurst: '{"policy": "auto"}'
         koordinator.sh/cpuBurst1: '{"policy": "auto"}'
         koordinator.sh/cpuBurst2: '{"policy": "auto"}'

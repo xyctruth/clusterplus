@@ -18,11 +18,12 @@ package v1
 
 import (
 	"fmt"
+	"strings"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"strings"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -110,6 +111,15 @@ func (r *Plus) GenerateVersionLabels(app *PlusApp) map[string]string {
 func (r *Plus) GenerateAppLabels(app *PlusApp) map[string]string {
 	var labels = r.GenerateLabels()
 	labels["version"] = app.Version
+	return labels
+}
+
+func (r *Plus) GenerateAppTemplateLabels(app *PlusApp) map[string]string {
+	var labels = r.GenerateLabels()
+	labels["version"] = app.Version
+	for k, v := range app.TemplateLabels {
+		labels[k] = v
+	}
 	return labels
 }
 
