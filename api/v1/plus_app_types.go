@@ -29,9 +29,10 @@ type PlusApp struct {
 }
 
 type PlusAppProbe struct {
-	HttpPath            string `json:"httpPath,omitempty"`
-	TimeoutSeconds      int32  `json:"timeoutSeconds,omitempty"`
-	InitialDelaySeconds int32  `json:"initialDelaySeconds,omitempty"`
+	ExecCommand         []string `json:"execCommand,omitempty"`
+	HttpPath            string   `json:"httpPath,omitempty"`
+	TimeoutSeconds      int32    `json:"timeoutSeconds,omitempty"`
+	InitialDelaySeconds int32    `json:"initialDelaySeconds,omitempty"`
 }
 
 func (r *PlusApp) Validate(fldPath *field.Path) error {

@@ -205,6 +205,10 @@ spec:
                       type: string
                     livenessProbe:
                       properties:
+                        execCommand:
+                          items:
+                            type: string
+                          type: array
                         httpPath:
                           type: string
                         initialDelaySeconds:
@@ -227,6 +231,10 @@ spec:
                       type: string
                     readinessProbe:
                       properties:
+                        execCommand:
+                          items:
+                            type: string
+                          type: array
                         httpPath:
                           type: string
                         initialDelaySeconds:

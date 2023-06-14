@@ -290,6 +290,12 @@ func (r *Deployment) buildProbe(probe *v1.PlusAppProbe, port int32) *corev1.Prob
 		p.TimeoutSeconds = probe.TimeoutSeconds
 	}
 
+	if len(probe.ExecCommand) > 0 {
+		p.Exec = &corev1.ExecAction{
+			Command: probe.ExecCommand,
+		}
+	}
+
 	if probe.HttpPath != "" {
 		p.ProbeHandler = corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
