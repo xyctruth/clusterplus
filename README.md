@@ -27,6 +27,12 @@ make install
 make run
 ```
 
+### 部署
+```shell
+make install
+make deploy IMG=docker.io/xyctruth/clusterplus:v0.1.31
+```
+
 ### samples yaml
 
 [samples config file](./config/samples)
