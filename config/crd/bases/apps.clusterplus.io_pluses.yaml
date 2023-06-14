@@ -266,6 +266,9 @@ spec:
                       type: object
                     restartMark:
                       type: string
+                    rollingUpdateType:
+                      description: 一个程序多个版本，（用于蓝绿版本,灰度版本等）
+                      type: string
                     templateAnnotations:
                       additionalProperties:
                         type: string
@@ -273,7 +276,6 @@ spec:
                     templateLabels:
                       additionalProperties:
                         type: string
-                      description: 一个程序多个版本，（用于蓝绿版本,灰度版本等）
                       type: object
                     version:
                       type: string

@@ -127,7 +127,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 			Selector: &metav1.LabelSelector{
 				MatchLabels: r.plus.GenerateAppLabels(app),
 			},
-			Strategy: r.buildStrategy(),
+			Strategy: r.buildStrategy(app),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      r.plus.GenerateAppTemplateLabels(app),
@@ -233,7 +233,13 @@ func (r *Deployment) buildReplicas(app *v1.PlusApp) *int32 {
 
 }
 
-func (r *Deployment) buildStrategy() appsv1.DeploymentStrategy {
+func (r *Deployment) buildStrategy(app *v1.PlusApp) appsv1.DeploymentStrategy {
+	if app.RollingUpdateType == appsv1.RecreateDeploymentStrategyType {
+		return appsv1.DeploymentStrategy{
+			Type: appsv1.RecreateDeploymentStrategyType,
+		}
+	}
+
 	maxSurge := intstr.FromString("25%")
 	maxUnavailable := intstr.FromString("25%")
 	return appsv1.DeploymentStrategy{
