@@ -61,16 +61,16 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
-#      readinessProbe:
-#        httpPath: /
-#        execCommand:
-#          - "/bin/grpc_health_probe"
-#          - "-addr=:8080"
-#      livenessProbe:
-#        httpPath: /
-#        execCommand:
-#          - "/bin/grpc_health_probe"
-#          - "-addr=:8080"
+      readinessProbe:
+        #httpPath: /
+        execCommand:
+          - "/bin/grpc_health_probe"
+          - "-addr=:8080"
+      livenessProbe:
+        #httpPath: /
+        execCommand:
+          - "/bin/grpc_health_probe"
+          - "-addr=:8080"
       hostAliases:
         - ip: 1.1.1.1
           hostnames:
