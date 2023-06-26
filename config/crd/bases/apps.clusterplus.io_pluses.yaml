@@ -224,6 +224,10 @@ spec:
                     minReplicas:
                       format: int32
                       type: integer
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
                     port:
                       format: int32
                       type: integer

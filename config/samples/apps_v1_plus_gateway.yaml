@@ -54,6 +54,8 @@ spec:
       maxReplicas: 10
       port: 8080
       protocol: http
+      nodeSelector:
+        haha: haha1
       resources:
         limits:
           cpu: "2"

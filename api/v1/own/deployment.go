@@ -144,6 +144,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 					SecurityContext:               &corev1.PodSecurityContext{},
 					SchedulerName:                 "default-scheduler",
 					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
+					NodeSelector:                  app.NodeSelector,
 					Containers: []corev1.Container{{
 						Image:                    r.plus.GetAppImage(app),
 						ImagePullPolicy:          corev1.PullAlways,

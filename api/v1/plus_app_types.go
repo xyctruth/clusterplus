@@ -26,6 +26,7 @@ type PlusApp struct {
 	ReadinessProbe      *PlusAppProbe                 `json:"readinessProbe,omitempty"`
 	LivenessProbe       *PlusAppProbe                 `json:"livenessProbe,omitempty"`
 	HostAliases         []corev1.HostAlias            `json:"hostAliases,omitempty"`
+	NodeSelector        map[string]string             `json:"nodeSelector,omitempty"`
 }
 
 type PlusAppProbe struct {
