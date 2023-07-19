@@ -77,6 +77,10 @@ spec:
         - ip: 1.1.1.1
           hostnames:
             - "123"
+      tolerations:
+        - key: "key1"
+          value: "v1"
+          effect: "NoSchedule"
     - version: green
       env:
         - name: VERSION
@@ -93,4 +97,3 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
-
