@@ -201,6 +201,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					}},
+					Tolerations: app.Tolerations,
 				},
 			},
 		},
