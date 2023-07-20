@@ -21,8 +21,8 @@ spec:
         - name: VERSION
           value: blue_version
       image: xyctruth/plus-test:v0.0.10
-      minReplicas: 1
-      maxReplicas: 10
+      minReplicas: -1
+      maxReplicas: -1
       port: 8080
       protocol: http
       resources:

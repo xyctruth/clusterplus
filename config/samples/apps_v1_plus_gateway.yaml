@@ -5,14 +5,11 @@ metadata:
 spec:
   gateway:
     hosts:
-      - api.tanjingpaas.com
-      - api-dev.tanjingmama.cn
-      - 114.55.25.242
-      - test.tanjingpaas.com
+      - api-fat.tanjingmama.cn
     weights: # 默认路由权重
       blue: 100
       green: 0
-    pathPrefix: ""
+    pathPrefix: "gateway-demo"
     route: # 指定路由进入环境
       blue:
         headersMatch:
@@ -54,8 +51,8 @@ spec:
       maxReplicas: 10
       port: 8080
       protocol: http
-      nodeSelector:
-        haha: haha1
+#      nodeSelector:
+#        haha: haha1
       resources:
         limits:
           cpu: "2"
@@ -63,16 +60,16 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
-      readinessProbe:
-        #httpPath: /
-        execCommand:
-          - "/bin/grpc_health_probe"
-          - "-addr=:8080"
-      livenessProbe:
-        #httpPath: /
-        execCommand:
-          - "/bin/grpc_health_probe"
-          - "-addr=:8080"
+#      readinessProbe:
+#        #httpPath: /
+#        execCommand:
+#          - "/bin/grpc_health_probe"
+#          - "-addr=:8080"
+#      livenessProbe:
+#        #httpPath: /
+#        execCommand:
+#          - "/bin/grpc_health_probe"
+#          - "-addr=:8080"
       hostAliases:
         - ip: 1.1.1.1
           hostnames:
@@ -86,8 +83,8 @@ spec:
         - name: VERSION
           value: green_version
       image: xyctruth/plus-test:v0.0.11
-      minReplicas: -1
-      maxReplicas: -1
+      minReplicas: 1
+      maxReplicas: 1
       port: 8080
       protocol: http
       resources:
