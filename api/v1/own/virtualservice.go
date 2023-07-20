@@ -52,7 +52,6 @@ func (r *VirtualService) Apply() error {
 			if err := r.client.Create(context.TODO(), obj); err != nil {
 				return err
 			}
-			return nil
 		} else {
 			if !reflect.DeepEqual(obj.Spec.Hosts, found.Spec.Hosts) ||
 				!reflect.DeepEqual(obj.Spec.Gateways, found.Spec.Gateways) ||
@@ -62,9 +61,10 @@ func (r *VirtualService) Apply() error {
 				!reflect.DeepEqual(obj.Spec.ExportTo, found.Spec.ExportTo) {
 				obj.ResourceVersion = found.ResourceVersion
 				r.logger.Info("Updating!")
-				return r.client.Update(context.TODO(), obj)
+				if err := r.client.Update(context.TODO(), obj); err != nil {
+					return err
+				}
 			}
-			return nil
 		}
 	}
 
@@ -83,7 +83,6 @@ func (r *VirtualService) Apply() error {
 		if err := r.client.Create(context.TODO(), obj); err != nil {
 			return err
 		}
-		return nil
 	} else {
 		if !reflect.DeepEqual(obj.Spec.Hosts, found.Spec.Hosts) ||
 			!reflect.DeepEqual(obj.Spec.Gateways, found.Spec.Gateways) ||
@@ -93,10 +92,12 @@ func (r *VirtualService) Apply() error {
 			!reflect.DeepEqual(obj.Spec.ExportTo, found.Spec.ExportTo) {
 			obj.ResourceVersion = found.ResourceVersion
 			r.logger.Info("Updating!")
-			return r.client.Update(context.TODO(), obj)
+			if err := r.client.Update(context.TODO(), obj); err != nil {
+				return err
+			}
 		}
-		return nil
 	}
+	return nil
 }
 
 func (r *VirtualService) UpdateStatus() error {
@@ -113,11 +114,11 @@ func (r *VirtualService) generate(isGateway bool) (*istioclientapiv1.VirtualServ
 	for _, app := range r.plus.Spec.Apps {
 		httpRoute := &istioapiv1.HTTPRoute{
 			Match:      r.generateMatch(app, isGateway),
-			Rewrite:    r.generateRewrite(),
+			Rewrite:    r.generateRewrite(isGateway),
 			Route:      r.generateRoute(app),
 			Fault:      r.generateFault(),
 			Retries:    r.generateRetries(),
-			CorsPolicy: r.generateCorsPolicy(),
+			CorsPolicy: r.generateCorsPolicy(isGateway),
 		}
 		if r.plus.Spec.Policy != nil {
 			httpRoute.Timeout = r.plus.Spec.Policy.GetTimeout()
@@ -127,12 +128,12 @@ func (r *VirtualService) generate(isGateway bool) (*istioclientapiv1.VirtualServ
 
 	if isGateway {
 		httpRoute := &istioapiv1.HTTPRoute{
-			Match:      r.generateDefaultMatches(),
-			Rewrite:    r.generateRewrite(),
+			Match:      r.generateDefaultMatches(isGateway),
+			Rewrite:    r.generateRewrite(isGateway),
 			Route:      r.generateDefaultRoute(),
 			Fault:      r.generateFault(),
 			Retries:    r.generateRetries(),
-			CorsPolicy: r.generateCorsPolicy(),
+			CorsPolicy: r.generateCorsPolicy(isGateway),
 		}
 		if r.plus.Spec.Policy != nil {
 			httpRoute.Timeout = r.plus.Spec.Policy.GetTimeout()
@@ -151,8 +152,8 @@ func (r *VirtualService) generate(isGateway bool) (*istioclientapiv1.VirtualServ
 			Labels:    r.plus.GenerateLabels(),
 		},
 		Spec: istioapiv1.VirtualService{
-			Hosts:    r.generateHost(),
-			Gateways: r.generateGateway(),
+			Hosts:    r.generateHost(isGateway),
+			Gateways: r.generateGateway(isGateway),
 			Http:     httpRoutes,
 		},
 	}
@@ -183,16 +184,16 @@ func (r *VirtualService) exist(isGateway bool) (bool, *istioclientapiv1.VirtualS
 	return true, found, nil
 }
 
-func (r *VirtualService) generateHost() []string {
-	if r.plus.Spec.Gateway == nil {
+func (r *VirtualService) generateHost(isGateway bool) []string {
+	if !isGateway {
 		return []string{fmt.Sprintf("%s.%s.svc.cluster.local", r.plus.GetName(), r.plus.GetNamespace())}
 	}
 	return r.plus.Spec.Gateway.Hosts
 
 }
 
-func (r *VirtualService) generateGateway() []string {
-	if r.plus.Spec.Gateway == nil {
+func (r *VirtualService) generateGateway(isGateway bool) []string {
+	if !isGateway {
 		return []string{"mesh"}
 	}
 	return []string{"istio-system/gateway"}
@@ -279,8 +280,8 @@ func (r *VirtualService) generateMatch(app *v1.PlusApp, isGateway bool) []*istio
 	return matches
 }
 
-func (r *VirtualService) generateDefaultMatches() []*istioapiv1.HTTPMatchRequest {
-	if r.plus.Spec.Gateway == nil {
+func (r *VirtualService) generateDefaultMatches(isGateway bool) []*istioapiv1.HTTPMatchRequest {
+	if !isGateway {
 		return nil
 	}
 	matches := make([]*istioapiv1.HTTPMatchRequest, 0, len(r.plus.Spec.Apps)*2)
@@ -303,8 +304,8 @@ func (r *VirtualService) generateDefaultMatches() []*istioapiv1.HTTPMatchRequest
 	return matches
 }
 
-func (r *VirtualService) generateRewrite() *istioapiv1.HTTPRewrite {
-	if r.plus.Spec.Gateway == nil {
+func (r *VirtualService) generateRewrite(isGateway bool) *istioapiv1.HTTPRewrite {
+	if !isGateway {
 		return nil
 	}
 
@@ -383,8 +384,8 @@ func (r *VirtualService) generateFault() *istioapiv1.HTTPFaultInjection {
 	return fault
 }
 
-func (r *VirtualService) generateCorsPolicy() *istioapiv1.CorsPolicy {
-	if r.plus.Spec.Gateway == nil || r.plus.Spec.Gateway.Cors == nil {
+func (r *VirtualService) generateCorsPolicy(isGateway bool) *istioapiv1.CorsPolicy {
+	if !isGateway || r.plus.Spec.Gateway.Cors == nil {
 		return nil
 	}
 

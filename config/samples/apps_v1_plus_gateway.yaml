@@ -16,7 +16,7 @@ spec:
         - MerchantId: "1123"
       green:
         headersMatch:
-        - MerchantId: "2"
+        - MerchantId: "4"
   policy:
     timeout: 10s
     maxRequests: 10000
