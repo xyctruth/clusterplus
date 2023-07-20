@@ -3,6 +3,13 @@ kind: Plus
 metadata:
   name: svc-a
 spec:
+#  gateway:
+#    hosts:
+#      - api-fat.tanjingmama.cn
+#    weights: # 默认路由权重
+#      blue: 100
+#      green: 0
+#    pathPrefix: "svc"
   policy:
     timeout: 10s
     maxRequests: 1000
@@ -16,29 +23,13 @@ spec:
       ejectionTime: 30s
       interval: 100s
   apps:
-#    - version: blue
-#      env:
-#        - name: VERSION
-#          value: blue_version
-#      image: xyctruth/plus-test:v0.0.10
-#      minReplicas: -1
-#      maxReplicas: -1
-#      port: 8080
-#      protocol: http
-#      resources:
-#        limits:
-#          cpu: "2"
-#          memory: 1Gi
-#        requests:
-#          cpu: 500m
-#          memory: 500Mi
-    - version: green
+    - version: blue
       env:
         - name: VERSION
-          value: green_version
+          value: blue_version
       image: xyctruth/plus-test:v0.0.10
       minReplicas: 1
-      maxReplicas: 10
+      maxReplicas: 1
       port: 8080
       protocol: http
       resources:
@@ -48,6 +39,22 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
+#    - version: green
+#      env:
+#        - name: VERSION
+#          value: green_version
+#      image: xyctruth/plus-test:v0.0.10
+#      minReplicas: 1
+#      maxReplicas: 10
+#      port: 8080
+#      protocol: http
+#      resources:
+#        limits:
+#          cpu: "2"
+#          memory: 1Gi
+#        requests:
+#          cpu: 500m
+#          memory: 500Mi
     - version: v1
       env:
         - name: VERSION
