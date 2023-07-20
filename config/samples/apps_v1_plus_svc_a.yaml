@@ -48,3 +48,19 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
+    - version: v1
+      env:
+        - name: VERSION
+          value: v1
+      image: xyctruth/plus-test:v0.0.10
+      minReplicas: 1
+      maxReplicas: 10
+      port: 8080
+      protocol: http
+      resources:
+        limits:
+          cpu: "2"
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 500Mi
