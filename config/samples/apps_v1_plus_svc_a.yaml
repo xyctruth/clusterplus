@@ -3,13 +3,13 @@ kind: Plus
 metadata:
   name: svc-a
 spec:
-#  gateway:
-#    hosts:
-#      - api-fat.tanjingmama.cn
-#    weights: # 默认路由权重
-#      blue: 100
-#      green: 0
-#    pathPrefix: "svc"
+  gateway:
+    hosts:
+      - api-fat.tanjingmama.cn
+    weights: # 默认路由权重
+      blue: 100
+      green: 0
+    pathPrefix: "svc"
   policy:
     timeout: 10s
     maxRequests: 1000

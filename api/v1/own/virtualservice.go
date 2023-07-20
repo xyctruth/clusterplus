@@ -36,12 +36,44 @@ func NewVirtualService(plus *v1.Plus, scheme *runtime.Scheme, client client.Clie
 
 // Apply this own resource, create or update
 func (r *VirtualService) Apply() error {
-	obj, err := r.generate()
+	if r.plus.Spec.Gateway != nil {
+		obj, err := r.generate(true)
+		if err != nil {
+			return err
+		}
+
+		exist, found, err := r.exist(true)
+		if err != nil {
+			return err
+		}
+
+		if !exist {
+			r.logger.Info("Not found, create it!")
+			if err := r.client.Create(context.TODO(), obj); err != nil {
+				return err
+			}
+			return nil
+		} else {
+			if !reflect.DeepEqual(obj.Spec.Hosts, found.Spec.Hosts) ||
+				!reflect.DeepEqual(obj.Spec.Gateways, found.Spec.Gateways) ||
+				!reflect.DeepEqual(obj.Spec.Http, found.Spec.Http) ||
+				!reflect.DeepEqual(obj.Spec.Tcp, found.Spec.Tcp) ||
+				!reflect.DeepEqual(obj.Spec.Tls, found.Spec.Tls) ||
+				!reflect.DeepEqual(obj.Spec.ExportTo, found.Spec.ExportTo) {
+				obj.ResourceVersion = found.ResourceVersion
+				r.logger.Info("Updating!")
+				return r.client.Update(context.TODO(), obj)
+			}
+			return nil
+		}
+	}
+
+	obj, err := r.generate(false)
 	if err != nil {
 		return err
 	}
 
-	exist, found, err := r.exist()
+	exist, found, err := r.exist(false)
 	if err != nil {
 		return err
 	}
@@ -75,12 +107,12 @@ func (r *VirtualService) Type() string {
 	return "VirtualService"
 }
 
-func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
+func (r *VirtualService) generate(isGateway bool) (*istioclientapiv1.VirtualService, error) {
 	httpRoutes := make([]*istioapiv1.HTTPRoute, 0, len(r.plus.Spec.Apps)+1)
 
 	for _, app := range r.plus.Spec.Apps {
 		httpRoute := &istioapiv1.HTTPRoute{
-			Match:      r.generateMatch(app),
+			Match:      r.generateMatch(app, isGateway),
 			Rewrite:    r.generateRewrite(),
 			Route:      r.generateRoute(app),
 			Fault:      r.generateFault(),
@@ -93,7 +125,7 @@ func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
 		httpRoutes = append(httpRoutes, httpRoute)
 	}
 
-	if r.plus.Spec.Gateway != nil {
+	if isGateway {
 		httpRoute := &istioapiv1.HTTPRoute{
 			Match:      r.generateDefaultMatches(),
 			Rewrite:    r.generateRewrite(),
@@ -107,10 +139,14 @@ func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
 		}
 		httpRoutes = append(httpRoutes, httpRoute)
 	}
+	name := r.plus.GetName()
+	if isGateway {
+		name = name + "-gateway"
+	}
 
 	vs := &istioclientapiv1.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.plus.GetName(),
+			Name:      name,
 			Namespace: r.plus.GetNamespace(),
 			Labels:    r.plus.GenerateLabels(),
 		},
@@ -129,9 +165,14 @@ func (r *VirtualService) generate() (*istioclientapiv1.VirtualService, error) {
 	return vs, nil
 }
 
-func (r *VirtualService) exist() (bool, *istioclientapiv1.VirtualService, error) {
+func (r *VirtualService) exist(isGateway bool) (bool, *istioclientapiv1.VirtualService, error) {
+	name := r.plus.GetName()
+	if isGateway {
+		name = name + "-gateway"
+	}
+
 	found := &istioclientapiv1.VirtualService{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: r.plus.GetName(), Namespace: r.plus.GetNamespace()}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: r.plus.GetNamespace()}, found)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil, nil
@@ -161,10 +202,10 @@ func (r *VirtualService) generatePrefixPath() string {
 	return r.plus.GeneratePrefixPath()
 }
 
-func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchRequest {
+func (r *VirtualService) generateMatch(app *v1.PlusApp, isGateway bool) []*istioapiv1.HTTPMatchRequest {
 	matches := make([]*istioapiv1.HTTPMatchRequest, 0, 10)
 
-	if r.plus.Spec.Gateway == nil {
+	if !isGateway {
 		if app.Version == "blue" || app.Version == "green" {
 			matches = append(matches, &istioapiv1.HTTPMatchRequest{
 				SourceNamespace: r.plus.GetNamespace(),
