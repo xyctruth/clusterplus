@@ -164,14 +164,13 @@ func (r *VirtualService) generatePrefixPath() string {
 func (r *VirtualService) generateMatch(app *v1.PlusApp) []*istioapiv1.HTTPMatchRequest {
 	matches := make([]*istioapiv1.HTTPMatchRequest, 0, 10)
 
-	if app.Version == "blue" || app.Version == "green" {
-		matches = append(matches, &istioapiv1.HTTPMatchRequest{
-			SourceNamespace: r.plus.GetNamespace(),
-			SourceLabels:    r.plus.GenerateVersionLabels(app),
-		})
-	}
-
 	if r.plus.Spec.Gateway == nil {
+		if app.Version == "blue" || app.Version == "green" {
+			matches = append(matches, &istioapiv1.HTTPMatchRequest{
+				SourceNamespace: r.plus.GetNamespace(),
+				SourceLabels:    r.plus.GenerateVersionLabels(app),
+			})
+		}
 		return matches
 	}
 
