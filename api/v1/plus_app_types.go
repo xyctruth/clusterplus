@@ -28,6 +28,7 @@ type PlusApp struct {
 	HostAliases         []corev1.HostAlias            `json:"hostAliases,omitempty"`
 	NodeSelector        map[string]string             `json:"nodeSelector,omitempty"`
 	Tolerations         []corev1.Toleration           `json:"tolerations,omitempty"`
+	LogPath             string                        `json:"logPath,omitempty"`
 }
 
 type PlusAppProbe struct {

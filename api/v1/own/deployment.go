@@ -110,7 +110,11 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	progressDeadlineSeconds := int32(600)
 	revisionHistoryLimit := int32(10)
 
+	logPath := "/app/logs/"
 	logsKey := r.plus.GetName() + "-logs"
+	if app.LogPath != "" {
+		logPath = app.LogPath
+	}
 
 	// 构建k8s Deployment
 	deployment := &appsv1.Deployment{
@@ -164,7 +168,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 							},
 							{
 								Name:      logsKey,
-								MountPath: "/app/logs/",
+								MountPath: logPath,
 							},
 						},
 					}},
