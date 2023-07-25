@@ -218,6 +218,8 @@ spec:
                           format: int32
                           type: integer
                       type: object
+                    logPath:
+                      type: string
                     maxReplicas:
                       format: int32
                       type: integer
