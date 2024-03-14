@@ -38,6 +38,10 @@ func (r *AutoScaling) Apply() error {
 			return err
 		}
 
+		if obj == nil {
+			return nil
+		}
+
 		exist, found, err := r.exist(app)
 		if err != nil {
 			return err
@@ -82,6 +86,10 @@ func (r *AutoScaling) Type() string {
 }
 
 func (r *AutoScaling) generate(app *v1.PlusApp) (*autoscalingv1.HorizontalPodAutoscaler, error) {
+	if app.Scale.Type == "keda" {
+		return nil, nil
+	}
+
 	targetCPUUtilizationPercentage := int32(80)
 	autoscaling := &autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{

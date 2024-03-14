@@ -20,6 +20,7 @@ type PlusApp struct {
 	MinReplicas         int32                         `json:"minReplicas,omitempty"`
 	MaxReplicas         int32                         `json:"maxReplicas,omitempty"`
 	Resources           corev1.ResourceRequirements   `json:"resources,omitempty"`
+	ProxyResources      corev1.ResourceRequirements   `json:"proxyResources,omitempty"`
 	Port                int32                         `json:"port,omitempty"`
 	Protocol            string                        `json:"protocol,omitempty"`
 	RestartMark         string                        `json:"restartMark,omitempty"`
@@ -29,6 +30,7 @@ type PlusApp struct {
 	NodeSelector        map[string]string             `json:"nodeSelector,omitempty"`
 	Tolerations         []corev1.Toleration           `json:"tolerations,omitempty"`
 	LogPath             string                        `json:"logPath,omitempty"`
+	Scale               PlusScale                     `json:"scale,omitempty"`
 }
 
 type PlusAppProbe struct {
@@ -36,6 +38,10 @@ type PlusAppProbe struct {
 	HttpPath            string   `json:"httpPath,omitempty"`
 	TimeoutSeconds      int32    `json:"timeoutSeconds,omitempty"`
 	InitialDelaySeconds int32    `json:"initialDelaySeconds,omitempty"`
+}
+
+type PlusScale struct {
+	Type string `json:"type,omitempty"`
 }
 
 func (r *PlusApp) Validate(fldPath *field.Path) error {

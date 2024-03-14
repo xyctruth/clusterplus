@@ -30,7 +30,7 @@ make run
 ### 部署
 ```shell
 make install
-make deploy IMG=docker.io/xyctruth/clusterplus:v0.1.31
+make deploy IMG=docker.io/xyctruth/clusterplus:v0.1.39
 ```
 
 ### samples yaml

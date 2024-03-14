@@ -2,6 +2,8 @@ package own
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-test/deep"
 	"reflect"
 
 	v1 "clusterplus.io/clusterplus/api/v1"
@@ -72,7 +74,11 @@ func (r *Deployment) Apply() error {
 				obj.Spec.Template.Annotations["apps.clusterplus.io/restart-mark"] = app.RestartMark
 			}
 
-			if !reflect.DeepEqual(obj.Spec, found.Spec) {
+			result := reflect.DeepEqual(obj.Spec, found.Spec)
+			if !result {
+				if diff := deep.Equal(obj.Spec, found.Spec); diff != nil {
+					fmt.Println(diff)
+				}
 				r.logger.Info("Updating!")
 				if err := r.client.Update(context.TODO(), obj); err != nil {
 					return err
@@ -155,7 +161,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 						Name:                     r.plus.GetAppName(app),
 						Ports:                    r.buildPorts(app),
 						Resources:                app.Resources,
-						Env:                      app.Env,
+						Env:                      r.buildEnv(app.Env),
 						Command:                  nil,
 						ReadinessProbe:           r.buildReadinessProbe(app),
 						LivenessProbe:            r.buildLivelinessProbe(app),
@@ -237,6 +243,17 @@ func (r *Deployment) exist(app *v1.PlusApp) (bool, *appsv1.Deployment, error) {
 func (r *Deployment) buildReplicas(app *v1.PlusApp) *int32 {
 	return &app.MinReplicas
 
+}
+
+func (r *Deployment) buildEnv(env []corev1.EnvVar) []corev1.EnvVar {
+	for i, _ := range env {
+		if env[i].ValueFrom != nil && env[i].ValueFrom.FieldRef != nil {
+			if env[i].ValueFrom.FieldRef.APIVersion == "" {
+				env[i].ValueFrom.FieldRef.APIVersion = "v1"
+			}
+		}
+	}
+	return env
 }
 
 func (r *Deployment) buildStrategy(app *v1.PlusApp) appsv1.DeploymentStrategy {
@@ -322,5 +339,22 @@ func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 	for k, v := range app.TemplateAnnotations {
 		m[k] = v
 	}
+
+	if app.ProxyResources.Requests.Cpu().String() != "" {
+		m["sidecar.istio.io/proxyCPU"] = app.ProxyResources.Requests.Cpu().String()
+	}
+
+	if app.ProxyResources.Limits.Cpu().String() != "" {
+		m["sidecar.istio.io/proxyCPULimit"] = app.ProxyResources.Limits.Cpu().String()
+	}
+
+	if app.ProxyResources.Requests.Memory().String() != "" {
+		m["sidecar.istio.io/proxyMemory"] = app.ProxyResources.Requests.Memory().String()
+	}
+
+	if app.ProxyResources.Limits.Memory().String() != "" {
+		m["sidecar.istio.io/proxyMemoryLimit"] = app.ProxyResources.Limits.Memory().String()
+	}
+
 	return m
 }

@@ -39,6 +39,15 @@ spec:
         requests:
           cpu: 500m
           memory: 500Mi
+      proxyResources:
+        limits:
+          cpu: "2"
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 500Mi
+      scale:
+        type: keda
 #    - version: green
 #      env:
 #        - name: VERSION
