@@ -26,11 +26,15 @@ make install
 ```shell
 make run
 ```
+### 打包并部署
+```shell
+make docker-build docker-push deploy IMG=xyctruth/clusterplus:v0.1.40 
+```
 
 ### 部署
 ```shell
 make install
-make deploy IMG=docker.io/xyctruth/clusterplus:v0.1.40
+make deploy IMG=xyctruth/clusterplus:v0.1.40
 ```
 
 ### samples yaml
