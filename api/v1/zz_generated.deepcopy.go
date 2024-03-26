@@ -79,6 +79,11 @@ func (in *PlusApp) DeepCopyInto(out *PlusApp) {
 	}
 	in.Resources.DeepCopyInto(&out.Resources)
 	in.ProxyResources.DeepCopyInto(&out.ProxyResources)
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(corev1.Affinity)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.ReadinessProbe != nil {
 		in, out := &in.ReadinessProbe, &out.ReadinessProbe
 		*out = new(PlusAppProbe)

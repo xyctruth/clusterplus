@@ -2,7 +2,6 @@ package own
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-test/deep"
 	"reflect"
 
@@ -74,12 +73,28 @@ func (r *Deployment) Apply() error {
 				obj.Spec.Template.Annotations["apps.clusterplus.io/restart-mark"] = app.RestartMark
 			}
 
-			result := reflect.DeepEqual(obj.Spec, found.Spec)
-			if !result {
+			r1 := obj.Spec.Template.Spec.Containers[0].Resources
+			r2 := found.Spec.Template.Spec.Containers[0].Resources
+
+			isMatch := true
+			if r1.Requests.Cpu().String() != r2.Requests.Cpu().String() ||
+				r1.Requests.Memory().String() != r2.Requests.Memory().String() ||
+				r1.Limits.Cpu().String() != r2.Limits.Cpu().String() ||
+				r1.Limits.Memory().String() != r2.Limits.Memory().String() {
+				isMatch = false
+			}
+
+			if isMatch {
+				obj.Spec.Template.Spec.Containers[0].Resources = found.Spec.Template.Spec.Containers[0].Resources
+				isMatch = reflect.DeepEqual(obj.Spec, found.Spec)
+			}
+
+			if !isMatch {
 				if diff := deep.Equal(obj.Spec, found.Spec); diff != nil {
-					fmt.Println(diff)
+					r.logger.Info("Updating!", "Diff", diff)
+				} else {
+					r.logger.Info("Updating! No Diff:")
 				}
-				r.logger.Info("Updating!")
 				if err := r.client.Update(context.TODO(), obj); err != nil {
 					return err
 				}
@@ -160,7 +175,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 						ImagePullPolicy:          corev1.PullAlways,
 						Name:                     r.plus.GetAppName(app),
 						Ports:                    r.buildPorts(app),
-						Resources:                app.Resources,
+						Resources:                r.buildResources(app.Resources),
 						Env:                      r.buildEnv(app.Env),
 						Command:                  nil,
 						ReadinessProbe:           r.buildReadinessProbe(app),
@@ -178,25 +193,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 							},
 						},
 					}},
-					//Affinity: &corev1.Affinity{
-					//	NodeAffinity: &corev1.NodeAffinity{
-					//		RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
-					//			NodeSelectorTerms: []corev1.NodeSelectorTerm{
-					//				{
-					//					MatchExpressions: []corev1.NodeSelectorRequirement{
-					//						{
-					//							Key:      "env",
-					//							Operator: corev1.NodeSelectorOpIn,
-					//							Values: []string{
-					//								"prod",
-					//							},
-					//						},
-					//					},
-					//				},
-					//			},
-					//		},
-					//	},
-					//},
+					Affinity: app.Affinity,
 					Volumes: []corev1.Volume{{
 						Name: "tz-config",
 						VolumeSource: corev1.VolumeSource{
@@ -272,6 +269,10 @@ func (r *Deployment) buildStrategy(app *v1.PlusApp) appsv1.DeploymentStrategy {
 			MaxUnavailable: &maxUnavailable,
 		},
 	}
+}
+
+func (r *Deployment) buildResources(res corev1.ResourceRequirements) corev1.ResourceRequirements {
+	return res
 }
 
 func (r *Deployment) buildPorts(app *v1.PlusApp) []corev1.ContainerPort {

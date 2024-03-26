@@ -21,6 +21,7 @@ type PlusApp struct {
 	MaxReplicas         int32                         `json:"maxReplicas,omitempty"`
 	Resources           corev1.ResourceRequirements   `json:"resources,omitempty"`
 	ProxyResources      corev1.ResourceRequirements   `json:"proxyResources,omitempty"`
+	Affinity            *corev1.Affinity              `json:"affinity,omitempty"`
 	Port                int32                         `json:"port,omitempty"`
 	Protocol            string                        `json:"protocol,omitempty"`
 	RestartMark         string                        `json:"restartMark,omitempty"`
