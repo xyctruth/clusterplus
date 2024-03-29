@@ -341,19 +341,19 @@ func (r *Deployment) buildAnnotations(app *v1.PlusApp) map[string]string {
 		m[k] = v
 	}
 
-	if app.ProxyResources.Requests.Cpu().String() != "" {
+	if app.ProxyResources.Requests.Cpu().String() != "0" {
 		m["sidecar.istio.io/proxyCPU"] = app.ProxyResources.Requests.Cpu().String()
 	}
 
-	if app.ProxyResources.Limits.Cpu().String() != "" {
+	if app.ProxyResources.Limits.Cpu().String() != "0" {
 		m["sidecar.istio.io/proxyCPULimit"] = app.ProxyResources.Limits.Cpu().String()
 	}
 
-	if app.ProxyResources.Requests.Memory().String() != "" {
+	if app.ProxyResources.Requests.Memory().String() != "0" {
 		m["sidecar.istio.io/proxyMemory"] = app.ProxyResources.Requests.Memory().String()
 	}
 
-	if app.ProxyResources.Limits.Memory().String() != "" {
+	if app.ProxyResources.Limits.Memory().String() != "0" {
 		m["sidecar.istio.io/proxyMemoryLimit"] = app.ProxyResources.Limits.Memory().String()
 	}
 
