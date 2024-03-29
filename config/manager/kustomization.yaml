@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: xyctruth/clusterplus
-  newTag: v0.1.41
+  newTag: v0.1.42
