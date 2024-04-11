@@ -127,7 +127,6 @@ func (r *Deployment) Type() string {
 
 func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 	hostPathType := corev1.HostPathType("")
-	terminationGracePeriodSeconds := int64(30)
 	progressDeadlineSeconds := int32(600)
 	revisionHistoryLimit := int32(10)
 
@@ -168,7 +167,7 @@ func (r *Deployment) generate(app *v1.PlusApp) (*appsv1.Deployment, error) {
 					DNSPolicy:                     corev1.DNSClusterFirst,
 					SecurityContext:               &corev1.PodSecurityContext{},
 					SchedulerName:                 "default-scheduler",
-					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
+					TerminationGracePeriodSeconds: r.buildTerminationGracePeriodSeconds(app),
 					NodeSelector:                  app.NodeSelector,
 					Containers: []corev1.Container{{
 						Image:                    r.plus.GetAppImage(app),
@@ -269,6 +268,14 @@ func (r *Deployment) buildStrategy(app *v1.PlusApp) appsv1.DeploymentStrategy {
 			MaxUnavailable: &maxUnavailable,
 		},
 	}
+}
+
+func (r *Deployment) buildTerminationGracePeriodSeconds(app *v1.PlusApp) *int64 {
+	t := int64(30)
+	if app.TerminationGracePeriodSeconds > 0 {
+		t = app.TerminationGracePeriodSeconds
+	}
+	return &t
 }
 
 func (r *Deployment) buildResources(res corev1.ResourceRequirements) corev1.ResourceRequirements {

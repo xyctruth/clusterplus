@@ -33,6 +33,7 @@ spec:
     - version: blue
       logPath: "/svr/log"
       rollingUpdateType: "Recreate"  # 默认滚动更新RollingUpdate, Recreate 在创建新的pod之前杀死所有现有的pod
+      terminationGracePeriodSeconds: 100
       templateLabels:
         aaa: bbb
       templateAnnotations:
