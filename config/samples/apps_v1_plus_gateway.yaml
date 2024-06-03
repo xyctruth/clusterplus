@@ -67,6 +67,8 @@ spec:
         execCommand:
           - "/bin/grpc_health_probe"
           - "-addr=:8080"
+        timeoutSeconds: 1
+        initialDelaySeconds: 2
       livenessProbe:
         #httpPath: /
         execCommand:
